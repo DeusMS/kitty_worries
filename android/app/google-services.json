@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1042085303110",
+    "project_id": "kitty-worries",
+    "storage_bucket": "kitty-worries.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1042085303110:android:c4de1126790e10caf94b47",
+        "android_client_info": {
+          "package_name": "com.example.kitty_worries"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCZnOlbwL1yGY4vjzMdqSmVwnXyPJPC6YQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
