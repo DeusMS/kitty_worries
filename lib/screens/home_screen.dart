@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../widgets/custom_drawer.dart';
 import '../widgets/task_list.dart';
-import 'calendar_screen.dart';
+import '../screens/calendar_screen.dart';
 import '../widgets/add_task_bottom_sheet.dart';
 import '../providers/task_provider.dart';
 import '../models/task.dart';
+import '../screens/settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final String? tagFilter;
@@ -76,6 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final screens = [
       _buildTaskScreen(tasks),
       const CalendarScreen(),
+      const SettingsScreen(),
     ];
 
     return Scaffold(
@@ -100,19 +102,22 @@ class _HomeScreenState extends State<HomeScreen> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.inbox), label: 'Задачи'),
           BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'Календарь'),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Настройки'),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            backgroundColor: Colors.transparent,
-            builder: (_) => const AddTaskBottomSheet(),
-          );
-        },
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: _selectedIndex == 0
+          ? FloatingActionButton(
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (_) => const AddTaskBottomSheet(),
+                );
+              },
+              child: const Icon(Icons.add),
+            )
+          : null,
     );
   }
 }
