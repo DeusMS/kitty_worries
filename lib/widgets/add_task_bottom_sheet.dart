@@ -64,7 +64,7 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
                     controller: _controller,
                     focusNode: _focusNode,
                     decoration: const InputDecoration(
-                      hintText: 'Что бы вы хотели сделать?',
+                      hintText: 'Укажите задачу',
                       border: InputBorder.none,
                     ),
                     style: const TextStyle(fontSize: 16),
