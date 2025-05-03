@@ -6,10 +6,13 @@ import 'screens/auth_screen.dart';
 import 'services/auth_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await initializeDateFormatting('ru_RU', null);
   tz.initializeTimeZones();
   runApp(const TickTickCloneApp());
 }
@@ -25,6 +28,15 @@ class TickTickCloneApp extends StatelessWidget {
       ],
       child: MaterialApp(
         title: 'Kitty Worries',
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('ru', 'RU'), // добавь другие, если надо
+          Locale('en', 'US'),
+        ],
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           useMaterial3: true,
@@ -52,23 +64,6 @@ class TickTickCloneApp extends StatelessWidget {
             backgroundColor: Color(0xFF2979FF),
             foregroundColor: Colors.white,
           ),
-          textTheme: const TextTheme(
-            bodyMedium: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
-            ),
-            bodySmall: TextStyle(
-              fontSize: 12,
-              color: Colors.black54,
-            ),
-          ),
-          listTileTheme: const ListTileThemeData(
-            iconColor: Colors.black54,
-            textColor: Colors.black87,
-            dense: true,
-            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          ),
         ),
         home: StreamBuilder(
           stream: AuthService().authStateChanges,
@@ -79,13 +74,9 @@ class TickTickCloneApp extends StatelessWidget {
               );
             }
             if (snapshot.hasData) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                Provider.of<TaskProvider>(context, listen: false).loadTasks();
-              });
               return const HomeScreen();
-            } else {
-              return const AuthScreen();
             }
+            return const AuthScreen();
           },
         ),
       ),

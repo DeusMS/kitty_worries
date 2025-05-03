@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/task.dart';
@@ -18,26 +19,24 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   String? _description;
   DateTime? _date;
   TaskPriority _priority = TaskPriority.medium;
-  List<String> _tags = [];
-  final _tagController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     if (widget.existingTask != null) {
-      _title = widget.existingTask!.title;
-      _description = widget.existingTask!.description;
-      _date = widget.existingTask!.date;
-      _priority = widget.existingTask!.priority;
-      _tags = [...widget.existingTask!.tags];
+      final task = widget.existingTask!;
+      _title = task.title;
+      _description = task.description;
+      _date = task.date;
+      _priority = task.priority;
     } else {
       _title = '';
     }
   }
 
   void _saveTask() {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
+    if (_formKey.currentState?.validate() ?? false) {
+      _formKey.currentState?.save();
 
       final newTask = Task(
         id: widget.existingTask?.id,
@@ -46,11 +45,10 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
         date: _date,
         priority: _priority,
         isCompleted: widget.existingTask?.isCompleted ?? false,
-        tags: _tags,
+        tags: widget.existingTask?.tags ?? [],
       );
 
       final provider = Provider.of<TaskProvider>(context, listen: false);
-
       if (widget.existingTask == null) {
         provider.addTask(newTask);
       } else {
@@ -61,17 +59,70 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     }
   }
 
-  @override
-  void dispose() {
-    _tagController.dispose();
-    super.dispose();
+  Future<DateTime?> showTickTickDateTimePicker(
+    BuildContext context, {
+    DateTime? initialDateTime,
+  }) {
+    DateTime tempPicked = initialDateTime ?? DateTime.now();
+
+    return showModalBottomSheet<DateTime>(
+      context: context,
+      isDismissible: true,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+            top: 16,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Выберите дату и время',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              SizedBox(
+                height: 200,
+                child: CupertinoDatePicker(
+                  initialDateTime: initialDateTime ?? DateTime.now(),
+                  mode: CupertinoDatePickerMode.dateAndTime,
+                  use24hFormat: true,
+                  onDateTimeChanged: (value) {
+                    tempPicked = value;
+                  },
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Отмена'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(tempPicked),
+                    child: const Text('ОК'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.existingTask == null ? 'Новая задача' : 'Редактировать'),
+        title: Text(widget.existingTask == null ? 'Новая задача' : 'Редактировать задачу'),
         actions: [
           IconButton(
             icon: const Icon(Icons.save),
@@ -88,7 +139,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
               TextFormField(
                 initialValue: _title,
                 decoration: const InputDecoration(labelText: 'Название'),
-                validator: (val) => val == null || val.isEmpty ? 'Введите название' : null,
+                validator: (val) =>
+                    val == null || val.isEmpty ? 'Введите название' : null,
                 onSaved: (val) => _title = val!,
               ),
               TextFormField(
@@ -98,67 +150,30 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
               ),
               const SizedBox(height: 16),
               ListTile(
-                title: const Text('Срок'),
-                subtitle: Text(_date != null
-                    ? '${_date!.day}.${_date!.month}.${_date!.year}'
-                    : 'Не задан'),
-                trailing: const Icon(Icons.calendar_today),
+                title: const Text('Дата и время'),
+                subtitle: Text(
+                  _date != null
+                      ? '${_date!.day}.${_date!.month}.${_date!.year} ${_date!.hour.toString().padLeft(2, '0')}:${_date!.minute.toString().padLeft(2, '0')}'
+                      : 'Не выбрано',
+                ),
                 onTap: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: _date ?? DateTime.now(),
-                    firstDate: DateTime(2020),
-                    lastDate: DateTime(2100),
-                  );
-                  if (picked != null) setState(() => _date = picked);
+                  final result = await showTickTickDateTimePicker(context, initialDateTime: _date);
+                  if (result != null) {
+                    setState(() => _date = result);
+                  }
                 },
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<TaskPriority>(
                 value: _priority,
-                items: TaskPriority.values.map((priority) {
-                  return DropdownMenuItem(
-                    value: priority,
-                    child: Text(priority.name.toUpperCase()),
-                  );
-                }).toList(),
+                items: TaskPriority.values
+                    .map((e) => DropdownMenuItem(
+                          value: e,
+                          child: Text(e.name),
+                        ))
+                    .toList(),
                 onChanged: (val) => setState(() => _priority = val!),
                 decoration: const InputDecoration(labelText: 'Приоритет'),
-              ),
-              const SizedBox(height: 24),
-              Text('Метки', style: Theme.of(context).textTheme.titleMedium),
-              Wrap(
-                spacing: 6,
-                children: _tags.map((tag) {
-                  return Chip(
-                    label: Text(tag),
-                    onDeleted: () {
-                      setState(() => _tags.remove(tag));
-                    },
-                  );
-                }).toList(),
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _tagController,
-                      decoration: const InputDecoration(hintText: 'Добавить метку'),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.add),
-                    onPressed: () {
-                      final tag = _tagController.text.trim();
-                      if (tag.isNotEmpty && !_tags.contains(tag)) {
-                        setState(() {
-                          _tags.add(tag);
-                          _tagController.clear();
-                        });
-                      }
-                    },
-                  ),
-                ],
               ),
             ],
           ),

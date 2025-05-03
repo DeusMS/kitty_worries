@@ -42,14 +42,28 @@ class CustomDrawer extends StatelessWidget {
               count: taskProvider.tasks.length,
               onTap: () {
                 Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (_) => const HomeScreen()),
+                  MaterialPageRoute(builder: (_) => const HomeScreen(viewFilter: 'inbox')),
                 );
               },
             ),
-            _drawerItem(icon: Icons.today, label: 'Сегодня'),
-            _drawerItem(icon: Icons.calendar_today, label: 'Завтра'),
-            _drawerItem(icon: Icons.calendar_view_week, label: 'Неделя'),
-            _drawerItem(icon: Icons.inbox, label: 'Входящие'),
+            _drawerItem(
+              icon: Icons.today,
+              label: 'Сегодня',
+              onTap: () {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (_) => const HomeScreen(viewFilter: 'today')),
+                );
+              },
+            ),
+            _drawerItem(
+              icon: Icons.calendar_view_week,
+              label: 'Неделя',
+              onTap: () {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (_) => const HomeScreen(viewFilter: 'week')),
+                );
+              },
+            ),
             const Divider(),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

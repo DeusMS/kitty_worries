@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart'; // ← добавлено для DateUtils
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/task.dart';
 import '../services/firebase_task_service.dart';
@@ -52,8 +52,27 @@ class TaskProvider extends ChangeNotifier {
     return _tasks.where((task) {
       if (task.date == null) return false;
       return task.date!.year == date.year &&
-            task.date!.month == date.month &&
-            task.date!.day == date.day;
+          task.date!.month == date.month &&
+          task.date!.day == date.day;
+    }).toList();
+  }
+
+  /// 🔹 Добавлено: Задачи на сегодня
+  List<Task> tasksForToday() {
+    final today = DateTime.now();
+    return _tasks.where((task) {
+      return task.date != null && DateUtils.isSameDay(task.date, today);
+    }).toList();
+  }
+
+  /// 🔹 Добавлено: Задачи на ближайшие 7 дней
+  List<Task> tasksForNext7Days() {
+    final now = DateTime.now();
+    final end = now.add(const Duration(days: 7));
+    return _tasks.where((task) {
+      return task.date != null &&
+          task.date!.isAfter(now.subtract(const Duration(days: 1))) &&
+          task.date!.isBefore(end);
     }).toList();
   }
 }

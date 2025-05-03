@@ -1,55 +1,46 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/task_provider.dart';
+import '../models/task.dart';
 import '../widgets/task_item.dart';
 import '../widgets/add_task_bottom_sheet.dart';
 
 class TaskList extends StatelessWidget {
-  final DateTime selectedDate;
-  final String? tagFilter;
+  final List<Task> tasks;
 
-  const TaskList({super.key, required this.selectedDate, this.tagFilter});
+  const TaskList({super.key, required this.tasks});
 
   @override
   Widget build(BuildContext context) {
-    final taskProvider = Provider.of<TaskProvider>(context);
-    final tasks = tagFilter != null
-        ? taskProvider.tasksWithTag(tagFilter!)
-        : taskProvider.tasksForDate(selectedDate);
-
-    return Column(
-      children: [
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.only(bottom: 80),
-            itemCount: tasks.length,
+    return tasks.isEmpty
+        ? const Center(child: Text('Нет задач'))
+        : ListView.builder(
+            padding: const EdgeInsets.only(bottom: 100),
+            itemCount: tasks.length + 1,
             itemBuilder: (context, index) {
-              return TaskItem(task: tasks[index]);
+              if (index < tasks.length) {
+                return TaskItem(task: tasks[index]);
+              } else {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Center(
+                    child: TextButton.icon(
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (_) => const AddTaskBottomSheet(),
+                        );
+                      },
+                      icon: const Icon(Icons.add, size: 20, color: Colors.blue),
+                      label: const Text(
+                        'Добавить задачу',
+                        style: TextStyle(color: Colors.blue),
+                      ),
+                    ),
+                  ),
+                );
+              }
             },
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: InkWell(
-            onTap: () {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (_) => const AddTaskBottomSheet(),
-              );
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(Icons.add, size: 20, color: Colors.blue),
-                SizedBox(width: 8),
-                Text('Добавить задачу', style: TextStyle(color: Colors.blue)),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
+          );
   }
 }

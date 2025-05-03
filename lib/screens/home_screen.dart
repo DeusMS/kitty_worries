@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../widgets/custom_drawer.dart';
 import '../widgets/task_list.dart';
 import 'calendar_screen.dart';
 import '../widgets/add_task_bottom_sheet.dart';
+import '../providers/task_provider.dart';
+import '../models/task.dart';
 
 class HomeScreen extends StatefulWidget {
   final String? tagFilter;
+  final String? viewFilter; // 'today', 'week', 'inbox'
 
-  const HomeScreen({super.key, this.tagFilter});
+  const HomeScreen({super.key, this.tagFilter, this.viewFilter});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -15,42 +19,50 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
-
-  late final List<Widget> _screens;
+  bool _initialized = false;
 
   @override
-  void initState() {
-    super.initState();
-    _screens = [
-      _buildTaskScreen(),
-      const CalendarScreen(),
-    ];
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      Provider.of<TaskProvider>(context, listen: false).loadTasks();
+      _initialized = true;
+    }
   }
 
-  Widget _buildTaskScreen() {
+  List<Task> _getFilteredTasks(TaskProvider provider) {
+    if (widget.tagFilter != null) {
+      return provider.tasksWithTag(widget.tagFilter!);
+    }
+    switch (widget.viewFilter) {
+      case 'today':
+        return provider.tasksForToday();
+      case 'week':
+        return provider.tasksForNext7Days();
+      default:
+        return provider.tasks;
+    }
+  }
+
+  Widget _buildTaskScreen(List<Task> tasks) {
     return Container(
       color: const Color(0xFFF5F5F7),
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withAlpha((0.05 * 255).toInt()),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.all(12),
-            child: TaskList(
-              selectedDate: DateTime.now(),
-              tagFilter: widget.tagFilter,
-            ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha((0.05 * 255).toInt()),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
+          padding: const EdgeInsets.all(12),
+          child: TaskList(tasks: tasks),
         ),
       ),
     );
@@ -58,6 +70,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final taskProvider = Provider.of<TaskProvider>(context);
+    final tasks = _getFilteredTasks(taskProvider);
+
+    final screens = [
+      _buildTaskScreen(tasks),
+      const CalendarScreen(),
+    ];
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -73,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
         iconTheme: const IconThemeData(color: Colors.black87),
       ),
       drawer: const CustomDrawer(),
-      body: _screens[_selectedIndex],
+      body: screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: (i) => setState(() => _selectedIndex = i),
