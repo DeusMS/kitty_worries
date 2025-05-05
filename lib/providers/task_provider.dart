@@ -1,78 +1,126 @@
-import 'package:flutter/material.dart'; // ← добавлено для DateUtils
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import '../models/task.dart';
+import '../services/list_service.dart';
 import '../services/firebase_task_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-class TaskProvider extends ChangeNotifier {
-  final FirebaseTaskService _firebaseService = FirebaseTaskService();
+class TaskProvider with ChangeNotifier {
   final List<Task> _tasks = [];
+  final List<String> _customLists = ['Входящие'];
 
-  List<Task> get tasks => _tasks;
+  List<Task> get tasks => [..._tasks];
+  List<String> get customLists => [..._customLists];
 
   List<String> get allTags {
-    return _tasks.expand((task) => task.tags).toSet().toList();
+    return _tasks
+        .expand((task) => task.tags)
+        .toSet()
+        .toList();
   }
 
-  void loadTasks() {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+  void addTask(Task task) {
+    _tasks.add(task);
+    if (!_customLists.contains(task.listName)) {
+      _customLists.add(task.listName);
+    }
+    notifyListeners();
+  }
 
-    _firebaseService.getTasksStream(user.uid).listen((taskList) {
-      _tasks.clear();
-      _tasks.addAll(taskList);
+  void updateTask(Task task) {
+    final index = _tasks.indexWhere((t) => t.id == task.id);
+    if (index != -1) {
+      _tasks[index] = task;
       notifyListeners();
-    });
+
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid != null && task.id != null) {
+        FirebaseTaskService().updateTask(uid, task.id!, task);
+      }
+    }
   }
 
-  Future<void> addTask(Task task) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    await _firebaseService.addTask(user.uid, task);
+  void deleteTask(Task task) {
+    _tasks.removeWhere((t) => t.id == task.id);
+    notifyListeners();
   }
-
-  Future<void> updateTask(Task task) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null || task.id == null) return;
-
-    await _firebaseService.updateTask(user.uid, task.id!, task);
-  }
-
-  Future<void> deleteTask(Task task) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null || task.id == null) return;
-
-    await _firebaseService.deleteTask(user.uid, task.id!);
-  }
-
-  List<Task> tasksWithTag(String tag) =>
-      _tasks.where((task) => task.tags.contains(tag)).toList();
 
   List<Task> tasksForDate(DateTime date) {
     return _tasks.where((task) {
       if (task.date == null) return false;
       return task.date!.year == date.year &&
-          task.date!.month == date.month &&
-          task.date!.day == date.day;
+            task.date!.month == date.month &&
+            task.date!.day == date.day;
     }).toList();
   }
 
-  /// 🔹 Добавлено: Задачи на сегодня
   List<Task> tasksForToday() {
     final today = DateTime.now();
-    return _tasks.where((task) {
-      return task.date != null && DateUtils.isSameDay(task.date, today);
-    }).toList();
+    return _tasks.where((t) =>
+        t.date != null &&
+        t.date!.year == today.year &&
+        t.date!.month == today.month &&
+        t.date!.day == today.day).toList();
   }
 
-  /// 🔹 Добавлено: Задачи на ближайшие 7 дней
   List<Task> tasksForNext7Days() {
     final now = DateTime.now();
-    final end = now.add(const Duration(days: 7));
-    return _tasks.where((task) {
-      return task.date != null &&
-          task.date!.isAfter(now.subtract(const Duration(days: 1))) &&
-          task.date!.isBefore(end);
-    }).toList();
+    final week = now.add(const Duration(days: 7));
+    return _tasks.where((t) =>
+        t.date != null &&
+        t.date!.isAfter(now.subtract(const Duration(days: 1))) &&
+        t.date!.isBefore(week)).toList();
+  }
+
+  List<Task> tasksWithTag(String tag) {
+    return _tasks.where((t) => t.tags.contains(tag)).toList();
+  }
+
+  List<Task> tasksInList(String listName) {
+    return _tasks.where((t) => t.listName == listName).toList();
+  }
+
+  Future<void> loadTasks() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    final firebaseTasks = await FirebaseTaskService().getTasks(uid);
+    _tasks
+      ..clear()
+      ..addAll(firebaseTasks);
+
+    notifyListeners();
+  }
+
+  Future<void> loadCustomLists() async {
+    final lists = await ListService.getLists();
+    _customLists
+      ..clear()
+      ..addAll(lists.toSet())
+      ..insert(0, 'Входящие');
+    notifyListeners();
+  }
+
+  Future<void> createList(String name) async {
+    await ListService.createList(name);
+    if (!_customLists.contains(name)) {
+      _customLists.add(name);
+      notifyListeners();
+    }
+  }
+
+  Future<void> renameList(String oldName, String newName) async {
+    await ListService.renameList(oldName, newName);
+    final index = _customLists.indexOf(oldName);
+    if (index != -1) {
+      _customLists[index] = newName;
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteList(String name) async {
+    await ListService.deleteList(name);
+    _customLists.remove(name);
+    _tasks.removeWhere((t) => t.listName == name);
+    notifyListeners();
   }
 }

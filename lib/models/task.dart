@@ -8,6 +8,7 @@ class Task {
   bool isCompleted;
   TaskPriority priority;
   List<String> tags;
+  String listName; // 🔹 название пользовательского списка
 
   Task({
     this.id,
@@ -17,6 +18,7 @@ class Task {
     this.isCompleted = false,
     this.priority = TaskPriority.medium,
     this.tags = const [],
+    this.listName = 'Входящие', // 🔸 значение по умолчанию
   });
 
   Map<String, dynamic> toMap() {
@@ -26,7 +28,8 @@ class Task {
       'date': date?.toIso8601String(),
       'isCompleted': isCompleted,
       'priority': priority.index,
-      'tags': tags, // ✅ сохраняем как список
+      'tags': tags,
+      'listName': listName, // 🔹 добавлено в Firebase
     };
   }
 
@@ -39,6 +42,7 @@ class Task {
       isCompleted: map['isCompleted'] ?? false,
       priority: TaskPriority.values[map['priority'] ?? 1],
       tags: map['tags'] != null ? List<String>.from(map['tags']) : [],
+      listName: map['listName'] ?? 'Входящие', // 🔹 читаем из Firebase
     );
   }
 }

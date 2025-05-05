@@ -1,17 +1,78 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 import '../providers/task_provider.dart';
 import '../screens/home_screen.dart';
+import '../services/user_service.dart';
 
-class CustomDrawer extends StatelessWidget {
+class CustomDrawer extends StatefulWidget {
   const CustomDrawer({super.key});
+
+  @override
+  State<CustomDrawer> createState() => _CustomDrawerState();
+}
+
+class _CustomDrawerState extends State<CustomDrawer> {
+  String? photoUrl;
+  String userName = 'Пользователь';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final data = await UserService.getUserData();
+    setState(() {
+      if (data?['photoUrl'] != null) photoUrl = data!['photoUrl'];
+      if (data?['name'] != null) userName = data!['name'];
+    });
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery);
+    if (picked != null) {
+      final file = File(picked.path);
+      await UserService.uploadAvatar(file);
+      await _loadUserData();
+    }
+  }
+
+  Future<void> _editName() async {
+    final controller = TextEditingController(text: userName);
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Изменить имя'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(hintText: 'Введите имя'),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Отмена')),
+          TextButton(onPressed: () => Navigator.pop(ctx, controller.text), child: const Text('Сохранить')),
+        ],
+      ),
+    );
+    if (result != null && result.trim().isNotEmpty) {
+      await UserService.updateUserName(result.trim());
+      await _loadUserData();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final taskProvider = Provider.of<TaskProvider>(context);
-    final tags = taskProvider.allTags;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final iconColor = isDark ? Colors.orange : const Color(0xFF2979FF);
+    final textColor = theme.textTheme.bodyLarge?.color ?? Colors.black;
 
     return Drawer(
+      backgroundColor: theme.scaffoldBackgroundColor,
       child: SafeArea(
         child: Column(
           children: [
@@ -19,34 +80,33 @@ class CustomDrawer extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  const CircleAvatar(
-                    radius: 24,
-                    backgroundImage: NetworkImage('https://i.imgur.com/QCNbOAo.png'),
+                  GestureDetector(
+                    onTap: _pickImage,
+                    child: CircleAvatar(
+                      radius: 24,
+                      backgroundImage: photoUrl != null
+                          ? NetworkImage(photoUrl!)
+                          : const NetworkImage('https://i.imgur.com/QCNbOAo.png'),
+                    ),
                   ),
                   const SizedBox(width: 12),
-                  const Text(
-                    'Пользователь',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                  GestureDetector(
+                    onTap: _editName,
+                    child: Text(
+                      userName,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: textColor,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-            const Divider(),
+            Divider(color: theme.dividerColor),
             _drawerItem(
-              icon: Icons.all_inbox,
-              label: 'Все',
-              count: taskProvider.tasks.length,
-              onTap: () {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (_) => const HomeScreen(viewFilter: 'inbox')),
-                );
-              },
-            ),
-            _drawerItem(
+              context: context,
               icon: Icons.today,
               label: 'Сегодня',
               onTap: () {
@@ -56,6 +116,7 @@ class CustomDrawer extends StatelessWidget {
               },
             ),
             _drawerItem(
+              context: context,
               icon: Icons.calendar_view_week,
               label: 'Неделя',
               onTap: () {
@@ -64,42 +125,133 @@ class CustomDrawer extends StatelessWidget {
                 );
               },
             ),
-            const Divider(),
+            Divider(color: theme.dividerColor),
+
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Row(
-                children: const [
-                  Icon(Icons.label, size: 18, color: Colors.grey),
-                  SizedBox(width: 8),
-                  Text('Метки', style: TextStyle(fontWeight: FontWeight.bold)),
+                children: [
+                  Icon(Icons.list, size: 18, color: theme.hintColor),
+                  const SizedBox(width: 8),
+                  Text('Списки', style: TextStyle(fontWeight: FontWeight.bold, color: textColor)),
                 ],
               ),
             ),
+
             Expanded(
               child: ListView.builder(
-                padding: EdgeInsets.zero,
-                itemCount: tags.length,
+                itemCount: taskProvider.customLists.length,
                 itemBuilder: (context, index) {
-                  final tag = tags[index];
+                  final listName = taskProvider.customLists[index];
                   return ListTile(
                     dense: true,
-                    leading: const Icon(Icons.local_offer, size: 18, color: Colors.grey),
-                    title: Text(tag, style: const TextStyle(fontSize: 13)),
+                    leading: Icon(Icons.folder, size: 20, color: theme.hintColor),
+                    title: Text(listName, style: TextStyle(fontSize: 14, color: textColor)),
                     onTap: () {
                       Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (_) => HomeScreen(tagFilter: tag)),
+                        MaterialPageRoute(builder: (_) => HomeScreen(listName: listName)),
                       );
+                    },
+                    onLongPress: () async {
+                      final action = await showModalBottomSheet<String>(
+                        context: context,
+                        builder: (ctx) => Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ListTile(
+                              leading: const Icon(Icons.edit),
+                              title: const Text('Переименовать'),
+                              onTap: () => Navigator.pop(ctx, 'rename'),
+                            ),
+                            ListTile(
+                              leading: const Icon(Icons.delete),
+                              title: const Text('Удалить'),
+                              onTap: () => Navigator.pop(ctx, 'delete'),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (!mounted) return;
+
+                      if (action == 'rename') {
+                        final controller = TextEditingController(text: listName);
+                        final newName = await showDialog<String>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('Переименовать список'),
+                            content: TextField(controller: controller),
+                            actions: [
+                              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Отмена')),
+                              TextButton(onPressed: () => Navigator.pop(ctx, controller.text), child: const Text('Сохранить')),
+                            ],
+                          ),
+                        );
+                        
+                        if (context.mounted) {
+                          if (newName != null && newName.trim().isNotEmpty && newName != listName) {
+                            await Provider.of<TaskProvider>(context, listen: false).renameList(listName, newName.trim());
+                          }
+                        }
+                      }
+
+                      if (!mounted) return;
+
+                      if (action == 'delete') {
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('Удалить список?'),
+                            content: const Text('Это также удалит все задачи в этом списке.'),
+                            actions: [
+                              TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Отмена')),
+                              TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Удалить')),
+                            ],
+                          ),
+                        );
+
+                        if (context.mounted) {
+                          if (confirm == true) {
+                            await Provider.of<TaskProvider>(context, listen: false).deleteList(listName);
+                          }
+                        }                          
+                      }
                     },
                   );
                 },
               ),
             ),
-            const Divider(),
+
+            Divider(color: theme.dividerColor),
             ListTile(
-              leading: const Icon(Icons.add, color: Colors.black87),
-              title: const Text('Добавить'),
-              trailing: const Icon(Icons.settings, color: Colors.grey),
-              onTap: () {},
+              leading: Icon(Icons.add, color: iconColor),
+              title: GestureDetector(
+                onTap: () async {
+                  final controller = TextEditingController();
+                  final result = await showDialog<String>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: const Text('Новый список'),
+                      content: TextField(
+                        controller: controller,
+                        decoration: const InputDecoration(hintText: 'Введите название'),
+                      ),
+                      actions: [
+                        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Отмена')),
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx, controller.text),
+                          child: const Text('Создать'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (result != null && result.trim().isNotEmpty) {
+                    await taskProvider.createList(result.trim());
+                  }
+                },
+                child: Text('Добавить', style: TextStyle(color: textColor)),
+              ),
+              trailing: Icon(Icons.settings, color: theme.hintColor),
             )
           ],
         ),
@@ -108,24 +260,27 @@ class CustomDrawer extends StatelessWidget {
   }
 
   Widget _drawerItem({
+    required BuildContext context,
     required IconData icon,
     required String label,
-    int? count,
     VoidCallback? onTap,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final iconColor = isDark ? Colors.orange : const Color(0xFF2979FF);
+    final textColor = theme.textTheme.bodyLarge?.color ?? Colors.black;
+
     return ListTile(
       dense: true,
-      leading: Icon(icon, color: Colors.black54, size: 20),
+      leading: Icon(icon, color: iconColor, size: 20),
       title: Text(
         label,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w600,
+          color: textColor,
         ),
       ),
-      trailing: count != null
-          ? Text('$count', style: const TextStyle(color: Colors.grey))
-          : null,
       onTap: onTap,
     );
   }

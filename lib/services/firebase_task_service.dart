@@ -20,6 +20,16 @@ class FirebaseTaskService {
     await _userTasksRef(uid).doc(taskId).delete();
   }
 
+  Future<List<Task>> getTasks(String uid) async {
+    final snapshot = await _userTasksRef(uid).get();
+
+    return snapshot.docs.map((doc) {
+      final task = Task.fromMap(doc.data());
+      task.id = doc.id;
+      return task;
+    }).toList();
+  }
+
   Stream<List<Task>> getTasksStream(String uid) {
     return _userTasksRef(uid).snapshots().map((snapshot) {
       return snapshot.docs.map((doc) {

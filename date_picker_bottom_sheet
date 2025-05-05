@@ -1,0 +1,179 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'time_picker_bottom_sheet.dart';
+
+class DatePickerBottomSheet extends StatefulWidget {
+  final DateTime? initialDate;
+  final void Function(DateTime) onDateSelected;
+
+  const DatePickerBottomSheet({
+    super.key,
+    this.initialDate,
+    required this.onDateSelected,
+  });
+
+  @override
+  State<DatePickerBottomSheet> createState() => _DatePickerBottomSheetState();
+}
+
+class _DatePickerBottomSheetState extends State<DatePickerBottomSheet> {
+  late DateTime selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedDate = widget.initialDate ?? DateTime.now();
+  }
+
+  void _apply() {
+    Navigator.pop(context);
+    widget.onDateSelected(selectedDate);
+  }
+
+  void _pickTime() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => TimePickerBottomSheet(
+        initialTime: selectedDate,
+        onTimeSelected: (time) {
+          setState(() {
+            selectedDate = DateTime(
+              selectedDate.year,
+              selectedDate.month,
+              selectedDate.day,
+              time.hour,
+              time.minute,
+            );
+          });
+        },
+      ),
+    );
+  }
+
+  void _setQuickDate(DateTime newDate) {
+    setState(() {
+      selectedDate = DateTime(
+        newDate.year,
+        newDate.month,
+        newDate.day,
+        selectedDate.hour,
+        selectedDate.minute,
+      );
+    });
+  }
+
+  DateTime _nextMonday() {
+    final now = DateTime.now();
+    final weekday = now.weekday;
+    final daysToAdd = (DateTime.monday - weekday + 7) % 7;
+    return now.add(Duration(days: daysToAdd == 0 ? 7 : daysToAdd));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final textTheme = theme.textTheme;
+    final accentColor = isDark ? Colors.orange : const Color(0xFF2979FF);
+
+    final calendarTheme = ThemeData(
+      useMaterial3: false,
+      colorScheme: isDark
+          ? ColorScheme.dark(
+              primary: Colors.orange,
+              onPrimary: Colors.black,
+              surface: Colors.grey[900]!,
+              onSurface: Colors.white,
+            )
+          : ColorScheme.light(
+              primary: Colors.blue,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
+            ),
+    );
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      padding: const EdgeInsets.only(top: 16, bottom: 24, left: 16, right: 16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Отмена', style: textTheme.bodyMedium),
+              ),
+              Text('Дата', style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+              TextButton(
+                onPressed: _apply,
+                child: Text('Применить', style: TextStyle(color: accentColor)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // Быстрые кнопки
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _quickChip('Сегодня', DateTime.now(), accentColor),
+              _quickChip('Завтра', DateTime.now().add(const Duration(days: 1)), accentColor),
+              _quickChip('Следующий Понедельник', _nextMonday(), accentColor),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          Theme(
+            data: calendarTheme,
+            child: CalendarDatePicker(
+              initialDate: selectedDate,
+              firstDate: DateTime(2000),
+              lastDate: DateTime(2100),
+              onDateChanged: (newDate) {
+                _setQuickDate(newDate);
+              },
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          ListTile(
+            leading: Icon(Icons.access_time, color: accentColor),
+            title: Text('Срок исполнения', style: textTheme.bodyLarge),
+            trailing: Text(
+              DateFormat('HH:mm').format(selectedDate),
+              style: textTheme.bodyMedium?.copyWith(color: theme.hintColor),
+            ),
+            onTap: _pickTime,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _quickChip(String label, DateTime date, Color color) {
+    return SizedBox(
+      width: 130,
+      child: ActionChip(
+        label: Text(
+          label,
+          textAlign: TextAlign.center,
+          softWrap: true,
+        ),
+        onPressed: () => _setQuickDate(date),
+        backgroundColor: color.withAlpha(25),
+        labelStyle: TextStyle(color: color),
+      ),
+    );
+  }
+}
