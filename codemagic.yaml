@@ -6,7 +6,7 @@ workflows:
       flutter: stable
       xcode: latest
       vars:
-        BUNDLE_ID: "com.yourcompany.kittyworries" # заменишь своим
+        BUNDLE_ID: "com.example.kittyWorries" # заменишь своим
       groups:
         - firebase_credentials
     scripts:
