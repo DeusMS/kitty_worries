@@ -19,11 +19,11 @@ workflows:
       - name: Получение Dart-зависимостей
         script: flutter pub get
 
-      - name: Обновление CocoaPods
-        script: |
-          cd ios
-          pod repo update    # актуализируем specs
-          pod install   
+      #- name: Обновление CocoaPods
+        #script: |
+          #cd ios
+          #pod repo update    # актуализируем specs
+          #pod install   
 
       - name: Декодируем GoogleService-Info.plist
         script: echo $GOOGLESERVICE_INFO_PLIST | base64 --decode > ios/Runner/GoogleService-Info.plist
