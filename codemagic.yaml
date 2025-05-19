@@ -16,9 +16,6 @@ workflows:
         - firebase_credentials
     scripts:
 
-      - name: Декодируем GoogleService-Info.plist
-        script: echo $GOOGLESERVICE_INFO_PLIST | base64 --decode > ios/Runner/GoogleService-Info.plist
-
       - name: Получение зависимостей Flutter
         script: flutter pub get
 
@@ -29,6 +26,9 @@ workflows:
           pod install              # теперь Podfile найдёт podhelper.rb и установит всё корректно
           cd ..
 
+      - name: Декодируем GoogleService-Info.plist
+        script: echo $GOOGLESERVICE_INFO_PLIST | base64 --decode > ios/Runner/GoogleService-Info.plist
+      
       - name: Настройка подписи Xcode
         script: xcode-project use-profiles
 
