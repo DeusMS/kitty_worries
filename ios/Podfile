@@ -1,19 +1,21 @@
-# в Codemagic FLUTTER_ROOT уже установлен в окружении
 flutter_application_path = File.expand_path('..', __dir__)
-
 podhelper_path = File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')
-if File.exist?(podhelper_path)
-  load podhelper_path
-end
 
 platform :ios, '13.0'
 use_frameworks!
 use_modular_headers!
 
-target 'Runner' do
-  flutter_install_all_ios_pods(flutter_application_path)
-end
+# Загружаем podhelper.rb только если он существует
+if File.exist?(podhelper_path)
+  load podhelper_path
 
-post_install do |installer|
-  flutter_post_install(installer)
+  target 'Runner' do
+    flutter_install_all_ios_pods(flutter_application_path)
+  end
+
+  post_install do |installer|
+    flutter_post_install(installer)
+  end
+else
+  puts "WARNING: podhelper.rb not found at #{podhelper_path}, skipping pod setup"
 end
