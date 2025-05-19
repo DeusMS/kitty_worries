@@ -12,7 +12,7 @@ workflows:
           bundle_identifier: ankit.appsinst.indjag
           certificates: 
             - kitty_cert
-          provisioning_profile:
+          provisioning_profiles:
             - Mob_prov  
       groups:
         - firebase_credentials
