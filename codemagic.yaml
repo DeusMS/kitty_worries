@@ -16,37 +16,41 @@ workflows:
         - firebase_credentials
 
     scripts:
-      - name: Очистка и подготовка
+      - name: Очистка проекта
         script: |
           flutter clean
-          flutter pub get
+          rm -rf ios/Pods ios/Podfile.lock
+
+      - name: Установка зависимостей Flutter
+        script: flutter pub get
 
       - name: Генерация iOS проекта
-        script: flutter build ios --release  # Убрали --no-codesign!
+        script: flutter build ios --release --no-codesign  # Явно генерируем podhelper.rb
 
-      - name: Проверка podhelper.rb
+      - name: Проверка ключевых файлов
         script: |
-          if [ -f "ios/Flutter/podhelper.rb" ]; then  # Правильный путь
-            echo "✅ podhelper.rb найден"
-          else
-            echo "❌ ОШИБКА: podhelper.rb не найден"
-            exit 1
-          fi
+          echo "Проверяем наличие podhelper.rb:"
+          ls -la ios/Flutter/podhelper.rb || echo "Файл не найден!"
+          
+          echo "Проверяем Podfile:"
+          cat ios/Podfile || echo "Podfile отсутствует"
 
-      - name: Установка CocoaPods зависимостей
+      - name: Обновление CocoaPods
+        script: |
+          sudo gem uninstall cocoapods -a -x
+          sudo gem install cocoapods -v 1.15.2  # Явно ставим стабильную версию
+
+      - name: Установка зависимостей
         script: |
           cd ios
-          pod install --repo-update  # Обновляем репозиторий
+          pod install --repo-update --verbose  # Добавляем подробный вывод
           cd ..
 
       - name: Настройка подписи
         script: xcode-project use-profiles
 
-      - name: Декодирование GoogleService-Info.plist
-        script: echo $GOOGLESERVICE_INFO_PLIST | base64 --decode > ios/Runner/GoogleService-Info.plist
-
       - name: Сборка IPA
-        script: flutter build ipa --release --export-options-plist="ios/ExportOptions.plist"  # Указать путь к plist
+        script: flutter build ipa --release --export-options-plist="ios/ExportOptions.plist"
 
     artifacts:
       - build/ios/ipa/*.ipa
