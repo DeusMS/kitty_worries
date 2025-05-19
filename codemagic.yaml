@@ -14,15 +14,28 @@ workflows:
           - Mob_prov
       groups:
         - firebase_credentials
+
     scripts:
       - name: Получение зависимостей
         script: flutter pub get
 
-      - name: Принудительная инициализация iOS
+      - name: Генерация iOS и podhelper.rb
         script: |
           flutter clean
           flutter pub get
           flutter build ios --release --no-codesign
+
+      - name: Отладка podhelper.rb
+        script: |
+          echo "Содержимое директории .ios/Flutter:"
+          ls -la .ios/Flutter/
+          
+          if [ -f .ios/Flutter/podhelper.rb ]; then
+            echo "Содержимое podhelper.rb:"
+            cat .ios/Flutter/podhelper.rb
+          else
+            echo "Файл podhelper.rb не найден!"
+          fi
 
       - name: Декодируем GoogleService-Info.plist
         script: echo $GOOGLESERVICE_INFO_PLIST | base64 --decode > ios/Runner/GoogleService-Info.plist
