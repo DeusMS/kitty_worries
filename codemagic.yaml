@@ -15,11 +15,6 @@ workflows:
       groups:
         - firebase_credentials
     scripts:
-      - name: Установка минимальной версии iOS
-        script: |
-          cd ios
-          echo "platform :ios, '13.0'" > Podfile
-          pod install
       - name: Установка зависимостей
         script: |
           flutter pub get
