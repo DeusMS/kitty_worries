@@ -3,7 +3,7 @@ workflows:
     name: iOS Release Build
     max_build_duration: 120  # Увеличиваем таймаут
     environment:
-      flutter: stable
+      flutter: 29.4
       xcode: latest
       vars:
         BUNDLE_ID: "ankit.appsinst.indjag"
