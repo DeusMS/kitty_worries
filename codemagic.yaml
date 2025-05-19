@@ -6,30 +6,39 @@ workflows:
       flutter: stable
       xcode: latest
       vars:
-        BUNDLE_ID: "ankit.appsinst.indjag" # заменишь своим
+        BUNDLE_ID: "ankit.appsinst.indjag"
       ios_signing:
-          certificates: 
-            - kitty_cert
-          provisioning_profiles:
-            - Mob_prov  
+        certificates:
+          - kitty_cert
+        provisioning_profiles:
+          - Mob_prov
       groups:
         - firebase_credentials
     scripts:
-      - name: Установка зависимостей
+      - name: Установка зависимостей Flutter
+        script: flutter pub get
+
+      - name: Декодируем GoogleService-Info.plist
+        script: echo $GOOGLESERVICE_INFO_PLIST | base64 --decode > ios/Runner/GoogleService-Info.plist
+
+      - name: Генерация Podfile и установка CocoaPods
         script: |
-          flutter pub get
-      - name: Генерация GoogleService-Info.plist
-        script: |
-          echo $GOOGLESERVICE_INFO_PLIST | base64 --decode > ios/Runner/GoogleService-Info.plist
-      - name: Настройка подписания в Xcode
-        script: |
-          xcode-project use-profiles
-      - name: Вывод содержимого export_options.plist
-        script: cat /Users/builder/export_options.plist
-      - name: Сборка iOS
-        script: |
-          flutter build ipa --release \
-            --export-options-plist=/Users/builder/export_options.plist
+          cd ios
+          if [ ! -f Podfile ]; then
+            flutter build ios || true
+          fi
+          sed -i '' 's/platform :ios, .*/platform :ios, "13.0"/' Podfile
+          if ! grep -q "platform :ios, \"13.0\"" Podfile; then
+            echo 'platform :ios, "13.0"' | cat - Podfile > temp && mv temp Podfile
+          fi
+          pod install
+
+      - name: Настройка подписи Xcode
+        script: xcode-project use-profiles
+
+      - name: Сборка IPA
+        script: flutter build ipa --release --export-options-plist=/Users/builder/export_options.plist
+
     artifacts:
       - build/ios/ipa/*.ipa
       - flutter_drive.log
