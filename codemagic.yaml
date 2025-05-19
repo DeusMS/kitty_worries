@@ -24,6 +24,9 @@ workflows:
       - name: Настройка подписи Xcode
         script: xcode-project use-profiles
 
+      - name: Генерация .ios (важный шаг!)
+        script: flutter build ios --release --no-codesign
+
       - name: Сборка IPA
         script: flutter build ipa --release
 
