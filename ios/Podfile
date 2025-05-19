@@ -1,30 +1,25 @@
-# Поддержка iOS 13.0 и выше
 platform :ios, '13.0'
 
-# Поддержка архитектуры M1
-ENV['COCOAPODS_DISABLE_STATS'] = 'true'
-
-# Поддержка Flutter
-flutter_root = File.expand_path(File.join('..', 'flutter'))
-load File.join(flutter_root, 'packages', 'flutter_tools', 'bin', 'podhelper.rb')
+use_frameworks!
+use_modular_headers!
 
 target 'Runner' do
-  use_frameworks!
-  use_modular_headers!
-
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 
+  # Поддержка unit-тестов (необязательно)
   target 'RunnerTests' do
     inherit! :search_paths
   end
-
 end
 
-# Постобработка для корректной сборки с Firebase
+# Функция flutter_install_all_ios_pods (вручную определена, без podhelper.rb)
+def flutter_install_all_ios_pods(app_path)
+  system('flutter', 'pub', 'get')
+  system('flutter', 'build', 'ios', '--no-codesign')
+end
+
 post_install do |installer|
   installer.pods_project.targets.each do |target|
-    flutter_additional_ios_build_settings(target)
-
     target.build_configurations.each do |config|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
     end
