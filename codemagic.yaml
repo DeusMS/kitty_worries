@@ -6,7 +6,12 @@ workflows:
       flutter: stable
       xcode: latest
       vars:
-        BUNDLE_ID: "com.example.kittyWorries" # заменишь своим
+        BUNDLE_ID: "ankit.appsinst.indjag" # заменишь своим
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: ankit.appsinst.indjag
+        certificate: "secure://Cert"
+        provisioning_profile: "secure://Mob_prov"  
       groups:
         - firebase_credentials
     scripts:

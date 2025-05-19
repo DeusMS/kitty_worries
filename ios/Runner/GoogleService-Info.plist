@@ -9,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.kittyWorries</string>
+	<string>ankit.appsinst.indjag</string>
 	<key>PROJECT_ID</key>
 	<string>kitty-worries</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,7 +25,7 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:1042085303110:ios:4337b2f65f3ef006f94b47</string>
+	<string>1:1042085303110:ios:40f3e0da938e7822f94b47</string>
 	<key>DATABASE_URL</key>
 	<string>https://kitty-worries-default-rtdb.europe-west1.firebasedatabase.app</string>
 </dict>
