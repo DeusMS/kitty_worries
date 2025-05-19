@@ -7,6 +7,12 @@ workflows:
       xcode: latest
       vars:
         BUNDLE_ID: "com.example.kittyWorries" # заменишь своим
+      code_signing:
+        certificates:
+          - certificate_name: "iApps_Cert" # замените на ваш Reference name
+            certificate_password: "iApps0101"  # если применимо
+        provisioning_profiles:
+          - profile_name: "iApps_Pro"
       groups:
         - firebase_credentials
     scripts:
