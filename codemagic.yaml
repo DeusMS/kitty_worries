@@ -8,8 +8,6 @@ workflows:
       vars:
         BUNDLE_ID: "ankit.appsinst.indjag" # заменишь своим
       ios_signing:
-          distribution_type: app_store
-          bundle_identifier: ankit.appsinst.indjag
           certificates: 
             - kitty_cert
           provisioning_profiles:
