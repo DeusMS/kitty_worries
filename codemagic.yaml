@@ -19,14 +19,14 @@ workflows:
       - name: Декодируем GoogleService-Info.plist
         script: echo $GOOGLESERVICE_INFO_PLIST | base64 --decode > ios/Runner/GoogleService-Info.plist
 
-      - name: Установка зависимостей Flutter
-        script: |
-          flutter pub get
-          
-      - name: Установка CocoaPods
+      - name: Получение зависимостей Flutter
+        script: flutter pub get
+
+      - name: Подготовка iOS-проекта
         script: |
           cd ios
-          pod install
+          pod repo update          # обновить локальный spec-repo, чтобы точно получить cocoapods
+          pod install              # теперь Podfile найдёт podhelper.rb и установит всё корректно
           cd ..
 
       - name: Настройка подписи Xcode
