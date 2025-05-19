@@ -10,7 +10,7 @@ workflows:
       ios_signing:
           distribution_type: app_store
           bundle_identifier: ankit.appsinst.indjag
-          certificate: 
+          certificates: 
             - kitty_cert
           provisioning_profile:
             - Mob_prov  
