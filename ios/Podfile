@@ -1,8 +1,10 @@
 # в Codemagic FLUTTER_ROOT уже установлен в окружении
 flutter_application_path = File.expand_path('..', __dir__)
 
-# используем podhelper из .ios структуры внутри проекта
-load File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')
+podhelper_path = File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')
+if File.exist?(podhelper_path)
+  load podhelper_path
+end
 
 platform :ios, '13.0'
 use_frameworks!
