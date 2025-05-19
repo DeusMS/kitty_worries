@@ -1,21 +1,12 @@
+# Поддержка iOS 13+
 platform :ios, '13.0'
 
+# Использовать Swift-плагины (например, awesome_notifications)
 use_frameworks!
 use_modular_headers!
 
 target 'Runner' do
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
-
-  # Поддержка unit-тестов (необязательно)
-  target 'RunnerTests' do
-    inherit! :search_paths
-  end
-end
-
-# Функция flutter_install_all_ios_pods (вручную определена, без podhelper.rb)
-def flutter_install_all_ios_pods(app_path)
-  system('flutter', 'pub', 'get')
-  system('flutter', 'build', 'ios', '--no-codesign')
 end
 
 post_install do |installer|
