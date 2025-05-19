@@ -19,23 +19,26 @@ workflows:
       - name: Получение зависимостей
         script: flutter pub get
 
-      - name: Генерация iOS и podhelper.rb
+      - name: Генерация podhelper.rb
         script: |
           flutter clean
           flutter pub get
           flutter build ios --release --no-codesign
 
-      - name: Отладка podhelper.rb
+      - name: Проверка наличия podhelper.rb
         script: |
-          echo "Содержимое директории .ios/Flutter:"
-          ls -la .ios/Flutter/
-          
           if [ -f .ios/Flutter/podhelper.rb ]; then
-            echo "Содержимое podhelper.rb:"
-            cat .ios/Flutter/podhelper.rb
+            echo "podhelper.rb найден"
           else
-            echo "Файл podhelper.rb не найден!"
+            echo "ОШИБКА: podhelper.rb не найден"
+            exit 1
           fi
+
+      - name: Ручной pod install
+        script: |
+          cd ios
+          pod install
+          cd ..
 
       - name: Декодируем GoogleService-Info.plist
         script: echo $GOOGLESERVICE_INFO_PLIST | base64 --decode > ios/Runner/GoogleService-Info.plist
