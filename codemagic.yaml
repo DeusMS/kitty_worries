@@ -15,24 +15,20 @@ workflows:
       groups:
         - firebase_credentials
     scripts:
-
       - name: Получение Dart-зависимостей
         script: flutter pub get
 
-      #- name: Обновление CocoaPods
-        #script: |
-          #cd ios
-          #pod repo update    # актуализируем specs
-          #pod install   
-
       - name: Декодируем GoogleService-Info.plist
         script: echo $GOOGLESERVICE_INFO_PLIST | base64 --decode > ios/Runner/GoogleService-Info.plist
-      
+
       - name: Настройка подписи Xcode
         script: xcode-project use-profiles
 
+      - name: Предсборка iOS
+        script: flutter build ios --release --no-codesign
+
       - name: Сборка IPA
-        script: flutter build ipa --release --export-options-plist=/Users/builder/export_options.plist
+        script: flutter build ipa --release
 
     artifacts:
       - build/ios/ipa/*.ipa
