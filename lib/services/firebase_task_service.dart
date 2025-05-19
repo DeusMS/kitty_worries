@@ -8,8 +8,10 @@ class FirebaseTaskService {
     return _firestore.collection('users').doc(uid).collection('tasks');
   }
 
-  Future<void> addTask(String uid, Task task) async {
-    await _userTasksRef(uid).add(task.toMap());
+  Future<Task> addTask(String uid, Task task) async {
+    final docRef = await _userTasksRef(uid).add(task.toMap());
+    final taskWithId = task.copyWith(id: docRef.id);
+    return taskWithId;
   }
 
   Future<void> updateTask(String uid, String taskId, Task task) async {

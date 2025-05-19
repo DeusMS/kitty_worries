@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/task.dart';
-import '../screens/task_detail_screen.dart';
 import '../providers/task_provider.dart';
+import '../screens/edit_task_bottom_screen.dart';
 
 class TaskItem extends StatelessWidget {
   final Task task;
@@ -61,11 +61,11 @@ class TaskItem extends StatelessWidget {
       },
       child: InkWell(
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => TaskDetailScreen(existingTask: task),
-            ),
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (_) => TaskBottomSheet(task: task),
           );
         },
         child: Padding(
@@ -106,7 +106,7 @@ class TaskItem extends StatelessWidget {
                         color: textColor,
                         decoration: task.isCompleted ? TextDecoration.lineThrough : null,
                       ),
-                       maxLines: 1,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     if (task.date != null)

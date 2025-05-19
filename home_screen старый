@@ -1,7 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:awesome_notifications/awesome_notifications.dart';
 import '../widgets/custom_drawer.dart';
 import '../widgets/task_list.dart';
 import '../widgets/add_task_bottom_sheet.dart';
@@ -9,19 +7,18 @@ import '../providers/task_provider.dart';
 import '../models/task.dart';
 import 'calendar_screen.dart';
 import 'settings_screen.dart';
+import '../services/notification_service.dart';
 
 class HomeScreen extends StatefulWidget {
   final String? tagFilter;
-  final String? viewFilter;
-  final String? listName;
-  final String? listOwnerId;
+  final String? viewFilter; // 'today', 'week'
+  final String? listName;   // <-- Добавлено
 
   const HomeScreen({
     super.key,
     this.tagFilter,
     this.viewFilter,
     this.listName,
-    this.listOwnerId,
   });
 
   @override
@@ -37,11 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.didChangeDependencies();
     if (!_initialized) {
       final provider = Provider.of<TaskProvider>(context, listen: false);
-      if (widget.listOwnerId != null && widget.listName != null) {
-        provider.loadTasksFromUserForList(widget.listName!, widget.listOwnerId!);
-      } else {
-        provider.loadTasks();
-      }
+      provider.loadTasks();
       provider.loadCustomLists();
       _initialized = true;
     }
@@ -62,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     return provider.tasksInList('Входящие');
   }
-
+  
   Widget _buildTaskScreen(List<Task> tasks) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -104,19 +97,6 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.listName ?? _getTitle(),
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-        backgroundColor: const Color(0xFFF5F5F7),
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black87),
-      ),
       drawer: const CustomDrawer(),
       body: screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
@@ -129,45 +109,18 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       floatingActionButton: _selectedIndex == 0
-          ? Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                FloatingActionButton(
-                  heroTag: 'notify',
-                  mini: true,
-                  onPressed: () async {
-                    await AwesomeNotifications().createNotification(
-                      content: NotificationContent(
-                        id: 0,
-                        channelKey: 'reminder_channel',
-                        title: '🔥 Уведомление работает',
-                        body: 'Это должно появиться немедленно',
-                        notificationLayout: NotificationLayout.Default,
-                      ),
-                    );
-                    if (kDebugMode) {
-                      debugPrint('🔔 Показываем уведомление прямо сейчас');
-                    }
-                  },
-                  child: const Icon(Icons.notifications),
-                ),
-                const SizedBox(height: 8),
-                FloatingActionButton(
-                  heroTag: 'add',
-                  onPressed: () {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      builder: (_) => AddTaskBottomSheet(
-                        listName: widget.listName ?? 'Входящие',
-                      ),
-                    );
-                  },
-                  child: const Icon(Icons.add),
-                ),
-              ],
+          ? FloatingActionButton(
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (_) => AddTaskBottomSheet(
+                    listName: widget.listName ?? 'Входящие',
+                  ),
+                );
+              },
+              child: const Icon(Icons.add),
             )
           : null,
     );

@@ -5,12 +5,10 @@ import 'time_picker_bottom_sheet.dart';
 
 class DatePickerBottomSheet extends StatefulWidget {
   final DateTime? initialDate;
-  final void Function(DateTime) onDateSelected;
 
   const DatePickerBottomSheet({
     super.key,
     this.initialDate,
-    required this.onDateSelected,
   });
 
   @override
@@ -29,8 +27,7 @@ class _DatePickerBottomSheetState extends State<DatePickerBottomSheet> {
   }
 
   void _apply() {
-    Navigator.pop(context);
-    widget.onDateSelected(selectedDate);
+    Navigator.pop(context, selectedDate);
   }
 
   void _pickTime() {

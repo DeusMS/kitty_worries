@@ -3,7 +3,8 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:provider/provider.dart';
 import '../models/task.dart';
 import '../providers/task_provider.dart';
-import '../screens/task_detail_screen.dart';
+import '../screens/edit_task_bottom_screen.dart';
+
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -73,11 +74,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         title: Text(task.title),
                         subtitle: time.isNotEmpty ? Text('Время: $time') : null,
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => TaskDetailScreen(existingTask: task),
-                            ),
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (_) => TaskBottomSheet(task: task),
                           );
                         },
                       );
@@ -88,15 +89,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => TaskDetailScreen(
-                existingTask: Task(
-                  title: '',
-                  date: _selectedDay,
-                  tags: [],
-                ),
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (_) => TaskBottomSheet(
+              task: Task(
+                title: '',
+                date: _selectedDay,
+                tags: [],
               ),
             ),
           );

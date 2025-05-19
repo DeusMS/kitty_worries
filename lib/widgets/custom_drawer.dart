@@ -1,10 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:kitty_worries/screens/share_list_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import '../providers/task_provider.dart';
 import '../screens/home_screen.dart';
 import '../services/user_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../models/task_group.dart';
 
 class CustomDrawer extends StatefulWidget {
   const CustomDrawer({super.key});
@@ -143,13 +146,22 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 itemCount: taskProvider.customLists.length,
                 itemBuilder: (context, index) {
                   final listName = taskProvider.customLists[index];
+                  final group = taskProvider.customLists[index];
+
+                  //final listTitle = group.name;
+                  //final listOwnerId = group.ownerId;
                   return ListTile(
                     dense: true,
                     leading: Icon(Icons.folder, size: 20, color: theme.hintColor),
                     title: Text(listName, style: TextStyle(fontSize: 14, color: textColor)),
                     onTap: () {
                       Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (_) => HomeScreen(listName: listName)),
+                        MaterialPageRoute(
+                          builder: (_) => HomeScreen(
+                            listName: listName,
+                            //listOwnerId: listOwnerId, // ⬅️ важно передать владельца
+                          ),
+                        ),  
                       );
                     },
                     onLongPress: () async {
@@ -158,6 +170,11 @@ class _CustomDrawerState extends State<CustomDrawer> {
                         builder: (ctx) => Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                            ListTile(
+                              leading: const Icon(Icons.share),
+                              title: const Text('Поделиться'),
+                              onTap: () => Navigator.pop(ctx, 'share'),
+                            ),
                             ListTile(
                               leading: const Icon(Icons.edit),
                               title: const Text('Переименовать'),
@@ -171,10 +188,40 @@ class _CustomDrawerState extends State<CustomDrawer> {
                           ],
                         ),
                       );
-
                       if (!mounted) return;
+                      if (action == 'share') {
+                        final currentUid = FirebaseAuth.instance.currentUser?.uid;
 
-                      if (action == 'rename') {
+                        final listId = await Provider.of<TaskProvider>(context, listen: false)
+                            .getListIdByName(listName);
+                        if (listId == null) return; // ✅ проверка на null
+
+                        final sharedWith = await Provider.of<TaskProvider>(context, listen: false)
+                            .getSharedWithByListId(listId);
+                        if (!context.mounted) return;
+
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (_) => ShareListBottomSheet(
+                            listId: listId,                    // ✅ уверенно приводим к String
+                            initiallyShared: sharedWith,        // ✅ обязательный параметр
+                          ),
+                        );
+                      } else if (action == 'share') {
+                        final id = await Provider.of<TaskProvider>(context, listen: false)
+                            .getListIdByName(listName);
+                        if (id == null) return;
+                        final sharedWith = await Provider.of<TaskProvider>(context, listen: false)
+                            .getSharedWithByListId(id);
+                        if (!context.mounted) return;
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (_) => ShareListBottomSheet(
+                            listId: id,
+                            initiallyShared: sharedWith,
+                          ),
+                        );
+                      } else if (action == 'rename') {
                         final controller = TextEditingController(text: listName);
                         final newName = await showDialog<String>(
                           context: context,
@@ -194,9 +241,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                           }
                         }
                       }
-
                       if (!mounted) return;
-
                       if (action == 'delete') {
                         final confirm = await showDialog<bool>(
                           context: context,

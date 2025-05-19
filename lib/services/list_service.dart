@@ -69,4 +69,30 @@ class ListService {
       await doc.reference.delete();
     }
   }
+
+  /// Обновление доступа к списку
+  static Future<void> updateSharedWith(String listId, List<String> uids) async {
+    await _lists.doc(listId).update({'sharedWith': uids});
+  }
+
+  /// Получение всех списков пользователя + расшаренных
+  static Future<List<Map<String, dynamic>>> getAccessibleLists() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return [];
+
+    final ownListsQuery = await FirebaseFirestore.instance
+        .collection('lists')
+        .where('userId', isEqualTo: uid)
+        .get();
+
+    final sharedListsQuery = await FirebaseFirestore.instance
+        .collection('lists')
+        .where('sharedWith', arrayContains: uid)
+        .get();
+
+    return [
+      ...ownListsQuery.docs.map((d) => {...d.data(), 'id': d.id}),
+      ...sharedListsQuery.docs.map((d) => {...d.data(), 'id': d.id}),
+    ];
+  }
 }

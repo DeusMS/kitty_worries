@@ -3,15 +3,21 @@
     <!-- Разрешения -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <application
         android:label="Kitty Worries"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true"
         android:allowBackup="true"
-        android:supportsRtl="true">
-        
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        <receiver android:name="me.carda.awesome_notifications.notifications.receivers.ActionReceiver" android:exported="true"/>
+        <receiver android:name="me.carda.awesome_notifications.notifications.receivers.DismissedReceiver" android:exported="true"/>
+        <receiver android:name="me.carda.awesome_notifications.notifications.receivers.NotificationReceiver" android:exported="true"/>
         <!-- Flutter иконки -->
+        <!-- Указывает, что используется новый Android embedding v2 -->
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />

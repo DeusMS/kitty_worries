@@ -4,8 +4,8 @@ import 'package:intl/intl.dart';
 import '../providers/task_provider.dart';
 import '../models/task.dart';
 import 'date_picker_bottom_sheet.dart';
-import '../services/firebase_task_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+//import '../services/firebase_task_service.dart';
+//import 'package:firebase_auth/firebase_auth.dart';
 
 class AddTaskBottomSheet extends StatefulWidget {
   final String listName; // ← теперь указывается список, куда добавить задачу
@@ -106,10 +106,6 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
                       final provider = Provider.of<TaskProvider>(context, listen: false);
                       provider.addTask(task);
 
-                      final uid = FirebaseAuth.instance.currentUser?.uid;
-                      if (uid != null) {
-                        await FirebaseTaskService().addTask(uid, task);
-                      }
                       if (context.mounted) {
                       Navigator.pop(context);
                       }
@@ -147,22 +143,19 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
                 ),
                 IconButton(
                   icon: Icon(Icons.calendar_today, size: 20, color: accentColor),
-                  onPressed: () {
-                    showModalBottomSheet(
+                  onPressed: () async {
+                    final picked = await showModalBottomSheet<DateTime>(
                       context: context,
                       isScrollControlled: true,
                       backgroundColor: Colors.transparent,
-                      builder: (_) => DatePickerBottomSheet(
-                        initialDate: selectedDate,
-                        onDateSelected: (picked) {
-                          if (mounted) {
-                            setState(() => selectedDate = picked);
-                          }
-                        },
-                      ),
+                      builder: (_) => DatePickerBottomSheet(initialDate: selectedDate),
                     );
+
+                    if (picked != null && mounted) {
+                      setState(() => selectedDate = picked);
+                    }
                   },
-                ),
+                )    
               ],
             ),
           ],
