@@ -16,15 +16,14 @@ workflows:
         - firebase_credentials
     scripts:
 
-      - name: Получение зависимостей Flutter
+      - name: Получение Dart-зависимостей
         script: flutter pub get
 
-      - name: Подготовка iOS-проекта
+      - name: Обновление CocoaPods
         script: |
           cd ios
-          pod repo update          # обновить локальный spec-repo, чтобы точно получить cocoapods
-          pod install              # теперь Podfile найдёт podhelper.rb и установит всё корректно
-          cd ..
+          pod repo update    # актуализируем specs
+          pod install   
 
       - name: Декодируем GoogleService-Info.plist
         script: echo $GOOGLESERVICE_INFO_PLIST | base64 --decode > ios/Runner/GoogleService-Info.plist
