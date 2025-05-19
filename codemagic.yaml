@@ -16,6 +16,11 @@ workflows:
       - name: Генерация GoogleService-Info.plist
         script: |
           echo $GOOGLESERVICE_INFO_PLIST | base64 --decode > ios/Runner/GoogleService-Info.plist
+      - name: Настройка подписания в Xcode
+        script: |
+          xcode-project use-profiles
+      - name: Вывод содержимого export_options.plist
+        script: cat /Users/builder/export_options.plist
       - name: Сборка iOS
         script: |
           flutter build ipa --release \
