@@ -1,7 +1,7 @@
 workflows:
   build-ios:
     name: iOS Release Build
-    max_build_duration: 60
+    max_build_duration: 120  # Увеличиваем таймаут
     environment:
       flutter: stable
       xcode: latest
@@ -19,31 +19,27 @@ workflows:
       - name: Очистка проекта
         script: |
           flutter clean
-          rm -rf ios/Pods ios/Podfile.lock
+          rm -rf ios/Pods ios/Podfile.lock ios/Flutter/podhelper.rb
 
-      - name: Установка зависимостей Flutter
+      - name: Установка зависимостей
         script: flutter pub get
 
       - name: Генерация iOS проекта
-        script: flutter build ios --release --no-codesign  # Явно генерируем podhelper.rb
-
-      - name: Проверка ключевых файлов
         script: |
-          echo "Проверяем наличие podhelper.rb:"
-          ls -la ios/Flutter/podhelper.rb || echo "Файл не найден!"
-          
-          echo "Проверяем Podfile:"
-          cat ios/Podfile || echo "Podfile отсутствует"
+          mkdir -p ios/Flutter
+          flutter build ios --release --no-codesign --no-sound-null-safety 2>&1
+          cp -f .ios/Flutter/podhelper.rb ios/Flutter/ || echo "Копирование не удалось"
 
-      - name: Обновление CocoaPods
+      - name: Проверка файлов
         script: |
-          sudo gem uninstall cocoapods -a -x
-          sudo gem install cocoapods -v 1.15.2  # Явно ставим стабильную версию
+          echo "Файлы в ios/Flutter:"
+          ls -la ios/Flutter/
+          [ -f "ios/Flutter/podhelper.rb" ] || exit 1
 
-      - name: Установка зависимостей
+      - name: Установка CocoaPods
         script: |
           cd ios
-          pod install --repo-update --verbose  # Добавляем подробный вывод
+          pod install --repo-update --verbose
           cd ..
 
       - name: Настройка подписи
