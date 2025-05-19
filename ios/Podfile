@@ -12,8 +12,11 @@ use_frameworks!                        # если вы его использов
 use_modular_headers!                   # или это
 
 target 'Runner' do
-  install_all_flutter_pods(flutter_application_path)
-  # …ваши другие pods
+  flutter_install_all_ios_pods(flutter_application_path)
+end
+
+post_install do |installer|
+  flutter_post_install(installer)
 end
 
 # ─── Конец Podfile ─────────────────────────────────────────────────────────
