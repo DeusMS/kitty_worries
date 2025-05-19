@@ -1,16 +1,11 @@
 platform :ios, '13.0'
 
-use_frameworks!
-use_modular_headers!
+ENV['FLUTTER_FRAMEWORK_DIR'] = File.join(__dir__, 'Flutter')
+
+require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper.rb'), File.expand_path('..', __dir__))
 
 target 'Runner' do
-  # Подключает зависимости Flutter
   install_all_flutter_pods(File.dirname(File.realpath(__FILE__)))
-end
-
-def install_all_flutter_pods(app_path)
-  flutter_application_path = File.expand_path("..", __dir__)
-  load File.join(flutter_application_path, '.dart_tool', 'flutter_dependencies.rb')
 end
 
 post_install do |installer|

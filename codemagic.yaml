@@ -15,13 +15,15 @@ workflows:
       groups:
         - firebase_credentials
     scripts:
-      - name: Установка зависимостей Flutter
-        script: flutter pub get
 
       - name: Декодируем GoogleService-Info.plist
         script: echo $GOOGLESERVICE_INFO_PLIST | base64 --decode > ios/Runner/GoogleService-Info.plist
 
-      - name: Установка зависимостей CocoaPods
+      - name: Установка зависимостей Flutter
+        script: |
+          flutter pub get
+          
+      - name: Установка CocoaPods
         script: |
           cd ios
           pod install
