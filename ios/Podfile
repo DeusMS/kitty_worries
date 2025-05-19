@@ -1,15 +1,12 @@
-# ─── Начало Podfile ─────────────────────────────────────────────────────────
-
 # в Codemagic FLUTTER_ROOT уже установлен в окружении
-flutter_root = ENV['FLUTTER_ROOT']
 flutter_application_path = File.expand_path('..', __dir__)
 
-# «грузим» podhelper из реального пути SDK
-load File.join(flutter_root, 'packages', 'flutter_tools', 'bin', 'podhelper.rb')
+# используем podhelper из .ios структуры внутри проекта
+load File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')
 
 platform :ios, '13.0'
-use_frameworks!                        # если вы его использовали
-use_modular_headers!                   # или это
+use_frameworks!
+use_modular_headers!
 
 target 'Runner' do
   flutter_install_all_ios_pods(flutter_application_path)
@@ -18,5 +15,3 @@ end
 post_install do |installer|
   flutter_post_install(installer)
 end
-
-# ─── Конец Podfile ─────────────────────────────────────────────────────────
