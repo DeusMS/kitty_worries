@@ -1,12 +1,16 @@
-# Поддержка iOS 13+
 platform :ios, '13.0'
 
-# Использовать Swift-плагины (например, awesome_notifications)
 use_frameworks!
 use_modular_headers!
 
 target 'Runner' do
-  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+  # Подключает зависимости Flutter
+  install_all_flutter_pods(File.dirname(File.realpath(__FILE__)))
+end
+
+def install_all_flutter_pods(app_path)
+  flutter_application_path = File.expand_path("..", __dir__)
+  load File.join(flutter_application_path, '.dart_tool', 'flutter_dependencies.rb')
 end
 
 post_install do |installer|
