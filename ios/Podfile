@@ -2,7 +2,13 @@ platform :ios, '13.0'
 
 ENV['FLUTTER_FRAMEWORK_DIR'] = File.join(__dir__, 'Flutter')
 
-require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper.rb'), File.expand_path('..', __dir__))
+# если FLUTTER_ROOT не задано, находим его через flutter
+ENV['FLUTTER_ROOT'] ||= `flutter sdk-path`.strip
+
+require File.expand_path(
+  File.join(ENV['FLUTTER_ROOT'], 'packages', 'flutter_tools', 'bin', 'podhelper.rb'),
+  __dir__,
+)
 
 target 'Runner' do
   install_all_flutter_pods(File.dirname(File.realpath(__FILE__)))
