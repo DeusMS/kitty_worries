@@ -1,20 +1,16 @@
+flutter_root = ENV['FLUTTER_ROOT']
 flutter_application_path = File.expand_path('..', __dir__)
-podhelper = File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')
+
+load File.join(flutter_root, 'packages', 'flutter_tools', 'bin', 'podhelper.rb')
 
 platform :ios, '13.0'
 use_frameworks!
 use_modular_headers!
 
-if File.exist?(podhelper)
-  load podhelper
+target 'Runner' do
+  flutter_install_all_ios_pods(flutter_application_path)
+end
 
-  target 'Runner' do
-    flutter_install_all_ios_pods(flutter_application_path)
-  end
-
-  post_install do |installer|
-    flutter_post_install(installer)
-  end
-else
-  raise "Missing podhelper.rb! Make sure to run 'flutter build ios' first to generate it."
+post_install do |installer|
+  flutter_post_install(installer)
 end
