@@ -25,7 +25,14 @@ workflows:
         script: flutter pub get
 
       - name: Генерация iOS артефактов
-        script: flutter build ios --no-codesign --debug
+        script: flutter build ios --no-codesign --release
+
+      - name: Повторный pod install (отладка)
+        script: |
+          echo "=== Подробный pod install ==="
+          cd ios
+          pod install --verbose
+          cd ..
 
       - name: Установка CocoaPods
         script: |
