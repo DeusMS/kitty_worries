@@ -1,5 +1,5 @@
 flutter_root = ENV['FLUTTER_ROOT']
-flutter_application_path = File.expand_path('..', __dir__)
+flutter_application_path = '.'
 
 load File.join(flutter_root, 'packages', 'flutter_tools', 'bin', 'podhelper.rb')
 
