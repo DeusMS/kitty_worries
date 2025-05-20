@@ -24,18 +24,24 @@ workflows:
       - name: Получение зависимостей
         script: flutter pub get
 
-      - name: Генерация iOS артефактов
-        script: flutter build ios --no-codesign --debug
-
-      - name: Повторный pod install (отладка)
+      - name: Генерация podhelper.rb и iOS структуры
         script: |
-          echo "=== Содержимое ios/ перед pod install ==="
-          ls -la ios/
-          echo "=== Запуск pod install ==="
+          flutter build ios --no-codesign --debug
+          cp -f .ios/Flutter/podhelper.rb ios/Flutter/ || true
+
+      - name: Проверка наличия podhelper.rb
+        script: |
+          if [ ! -f "ios/Flutter/podhelper.rb" ]; then
+            echo "Файл podhelper.rb не найден!"
+            exit 1
+          fi
+
+      - name: Установка CocoaPods
+        script: |
           cd ios
-          pod install --verbose
+          pod install --repo-update
           cd ..
-      
+
       - name: Настройка подписи
         script: xcode-project use-profiles
 
