@@ -3,7 +3,7 @@ platform :ios, '15.0'
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
 flutter_application_path = '../'
-podhelper_path = File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')
+podhelper_path = File.expand_path('../.ios/Flutter/podhelper.rb', __dir__)
 
 # Только загружаем, если файл реально уже создан
 if File.exist?(podhelper_path)
