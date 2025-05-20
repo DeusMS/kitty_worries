@@ -33,7 +33,12 @@ workflows:
       - name: Сборка Flutter без подписи (генерация iOS-проектов)
         script: |
           echo "=== Flutter build (no codesign) ==="
-          flutter build ios --release --no-codesign
+          flutter build ios --release --no-codesign || true
+
+      - name: Вывод дерева проекта (всегда)
+        script: |
+          echo "📁 Структура проекта после сборки:"
+          find . -print    
     
       - name: Установка зависимостей CocoaPods
         script: |
@@ -56,14 +61,7 @@ workflows:
                      -exportPath build/ios/ipa \
                      -exportOptionsPlist ExportOptions.plist \
     
-                     CODE_SIGNING_ALLOWED=NO
-    post_build:
-      - name: Вывод дерева проекта
-        script: |
-          echo "📁 Структура проекта после сборки:"
-          find . -print
-        always_run: true
-                         
+                     CODE_SIGNING_ALLOWED=NO                         
     artifacts:
       - build/ios/ipa/*.ipa
       - ios/Pods/Manifest.lock
