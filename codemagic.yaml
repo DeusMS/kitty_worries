@@ -35,11 +35,22 @@ workflows:
           pod install --repo-update
           cd ..
 
-      - name: Сборка IPA
+      - name: Build unsigned IPA
+        script: flutter build ios --release --no-codesign
+      - name: Archive IPA
         script: |
-          echo "=== Сборка IPA ==="
-          flutter build ipa --release --export-options-plist="ios/ExportOptions.plist"
-
+          xcodebuild -workspace ios/Runner.xcworkspace \
+                     -scheme Runner \
+                     -configuration Release \
+                     -sdk iphoneos \
+                     -archivePath build/ios/archive/Runner.xcarchive \
+                     archive CODE_SIGNING_ALLOWED=NO
+    
+          xcodebuild -exportArchive \
+                     -archivePath build/ios/archive/Runner.xcarchive \
+                     -exportPath build/ios/ipa \
+                     -exportOptionsPlist ExportOptions.plist \
+                     CODE_SIGNING_ALLOWED=NO
     artifacts:
       - build/ios/ipa/*.ipa
       - ios/Pods/Manifest.lock
