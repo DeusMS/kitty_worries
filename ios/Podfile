@@ -3,7 +3,8 @@ platform :ios, '15.0'
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
 flutter_application_path = '../'
-load File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')
+podhelper_path = File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')
+load podhelper_path if File.exist?(podhelper_path)
 
 target 'Runner' do
   use_frameworks! :linkage => :static
