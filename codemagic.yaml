@@ -49,3 +49,5 @@ workflows:
     artifacts:
       - build/ios/ipa/*.ipa
       - flutter_drive.log
+      - ios/Pods/Manifest.lock
+      - logs/**/*.log
