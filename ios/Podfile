@@ -1,16 +1,43 @@
 platform :ios, '16.0'
 
-use_frameworks! :linkage => :static
-
-install! 'cocoapods', :deterministic_uuids => false
-
-flutter_application_path = '../'
-load File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')
-
 target 'Runner' do
-  install_all_flutter_pods(flutter_application_path)
+  use_frameworks!
+  use_modular_headers!
+
+  flutter_install_all_ios_pods(File.dirname(File.realpath(__FILE__)))
 end
 
-post_install do |installer|
-  flutter_post_install(installer)
+# Имитация flutter_install_all_ios_pods
+def flutter_install_all_ios_pods(flutter_application_path)
+  install_flutter_engine_pod
+  install_flutter_plugin_pods
+end
+
+def install_flutter_engine_pod
+  pod 'Flutter', :path => '.symlinks/flutter/ios'
+end
+
+def install_flutter_plugin_pods
+  plugin_pods = {
+    'provider' => 'provider',
+    'path_provider' => 'path_provider',
+    'table_calendar' => 'table_calendar',
+    'intl' => 'intl',
+    'timezone' => 'timezone',
+    'firebase_core' => 'firebase_core',
+    'firebase_auth' => 'firebase_auth',
+    'cloud_firestore' => 'cloud_firestore',
+    'image_picker' => 'image_picker',
+    'firebase_storage' => 'firebase_storage',
+    'firebase_messaging' => 'firebase_messaging',
+    'googleapis_auth' => 'googleapis_auth',
+    'http' => 'http',
+    'permission_handler' => 'permission_handler',
+    'awesome_notifications' => 'awesome_notifications',
+    'foundation' => 'foundation'
+  }
+
+  plugin_pods.each do |name, path|
+    pod name, :path => File.join('.symlinks/plugins', path, 'ios')
+  end
 end
