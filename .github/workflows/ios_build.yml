@@ -19,8 +19,11 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Prebuild Flutter iOS (generate .ios and podhelper.rb)
-        run: flutter build ios --release --no-codesign
+      - name: Подготовка проекта Flutter
+        run: |
+          flutter clean
+          flutter pub get
+          flutter build ios --release --no-codesign
 
       - name: Decode and install certificate
         run: |
