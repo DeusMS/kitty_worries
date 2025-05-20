@@ -18,15 +18,16 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
+
+      - name: 📄 Показать текущий Podfile
+        run: cat ios/Podfile
+
+      - name: Удалить старую папку .ios (если есть)
+        run: rm -rf .ios
         
       - name: Очистка и сборка iOS (с генерацией podhelper.rb)
         run: |
           flutter build ios --release --no-codesign
-
-      - name: Выполнить pod install вручную
-        run: |
-          cd ios
-          pod install
 
       - name: Decode and install certificate
         run: |
