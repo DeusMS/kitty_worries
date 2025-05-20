@@ -4,9 +4,18 @@ ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
 flutter_application_path = '../'
 podhelper_path = File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')
-load podhelper_path if File.exist?(podhelper_path)
+
+# Только загружаем, если файл уже есть
+if File.exist?(podhelper_path)
+  load podhelper_path
+end
 
 target 'Runner' do
   use_frameworks! :linkage => :static
-  install_all_flutter_pods(flutter_application_path)
+
+  # Не вызывайте метод, если podhelper.rb не был загружен
+  if defined?(install_all_flutter_pods)
+    install_all_flutter_pods(flutter_application_path)
+  end
 end
+
