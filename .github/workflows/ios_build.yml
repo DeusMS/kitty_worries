@@ -19,11 +19,16 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Подготовка проекта Flutter
+      - name: Очистка и сборка iOS (с генерацией podhelper.rb)
         run: |
           flutter clean
           flutter pub get
           flutter build ios --release --no-codesign
+
+      - name: Выполнить pod install вручную
+        run: |
+          cd ios
+          pod install
 
       - name: Decode and install certificate
         run: |
