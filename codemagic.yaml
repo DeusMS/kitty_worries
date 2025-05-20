@@ -18,36 +18,46 @@ workflows:
     scripts:
       - name: Очистка проекта
         script: |
+          echo "=== Очистка проекта ==="
           flutter clean
           rm -rf ios/Pods ios/Podfile.lock
 
-      - name: Получение зависимостей
-        script: flutter pub get
-
-      - name: Генерация iOS артефактов
-        script: flutter build ios --no-codesign --release
-
-      - name: Повторный pod install (отладка)
-        script: |
-          echo "=== Подробный pod install ==="
-          cd ios
-          pod install --verbose
-          cd ..
-
       - name: Установка CocoaPods
         script: |
+          echo "=== Установка/обновление CocoaPods ==="
+          gem install cocoapods
           cd ios
           pod install --repo-update
           cd ..
 
-      - name: Настройка подписи
-        script: xcode-project use-profiles
+      - name: Получение зависимостей Flutter
+        script: |
+          echo "=== Получение зависимостей Flutter ==="
+          flutter pub get
+
+      - name: Генерация iOS артефактов
+        script: |
+          echo "=== Генерация iOS артефактов ==="
+          flutter build ios --no-codesign --release
+
+      - name: Подробный pod install
+        script: |
+          echo "=== Подробный pod install ==="
+          cd ios
+          pod install --verbose | tee ../logs/pod_install.log
+          cd ..
+
+      - name: Настройка профилей подписи
+        script: |
+          echo "=== Настройка профилей подписи ==="
+          xcode-project use-profiles
 
       - name: Сборка IPA
-        script: flutter build ipa --release --export-options-plist="ios/ExportOptions.plist"
+        script: |
+          echo "=== Сборка IPA ==="
+          flutter build ipa --release --export-options-plist="ios/ExportOptions.plist"
 
     artifacts:
       - build/ios/ipa/*.ipa
-      - flutter_drive.log
-      - ios/Pods/Manifest.lock
       - logs/**/*.log
+      - ios/Pods/Manifest.lock
