@@ -16,6 +16,13 @@ end
 target 'Runner' do
   use_frameworks! :linkage => :static
 
+  # ⬇️ Важно: явно подключаем Firebase SDK
+  pod 'Firebase/Core'
+  pod 'Firebase/Auth'
+  pod 'Firebase/Firestore'
+  pod 'Firebase/Messaging'
+  pod 'Firebase/Storage'
+
   if defined?(install_all_flutter_pods)
     install_all_flutter_pods(flutter_application_path)
   else
