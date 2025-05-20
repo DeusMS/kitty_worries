@@ -1,13 +1,6 @@
 platform :ios, '16.0'
 
-target 'Runner' do
-  use_frameworks!
-  use_modular_headers!
-
-  flutter_install_all_ios_pods(File.dirname(File.realpath(__FILE__)))
-end
-
-# Имитация flutter_install_all_ios_pods
+# СНАЧАЛА определяем метод
 def flutter_install_all_ios_pods(flutter_application_path)
   install_flutter_engine_pod
   install_flutter_plugin_pods
@@ -40,4 +33,12 @@ def install_flutter_plugin_pods
   plugin_pods.each do |name, path|
     pod name, :path => File.join('.symlinks/plugins', path, 'ios')
   end
+end
+
+# И ТОЛЬКО ПОТОМ вызываем
+target 'Runner' do
+  use_frameworks!
+  use_modular_headers!
+
+  flutter_install_all_ios_pods(File.dirname(File.realpath(__FILE__)))
 end
