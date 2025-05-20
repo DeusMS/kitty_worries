@@ -22,34 +22,17 @@ workflows:
           flutter clean
           rm -rf ios/Pods ios/Podfile.lock
 
-      - name: Обновление CocoaPods
-        script: |
-          echo "=== Установка/обновление CocoaPods ==="
-          gem install cocoapods
-          pod repo update
-
       - name: Получение зависимостей Flutter
         script: |
           echo "=== Получение зависимостей Flutter ==="
           flutter pub get
 
-      - name: Генерация iOS артефактов
+      - name: Установка зависимостей CocoaPods
         script: |
-          echo "=== Генерация iOS артефактов ==="
-          flutter build ios --no-codesign --release
-
-      - name: Подробный pod install
-        script: |
-          echo "=== Подробный pod install ==="
+          echo "=== Установка зависимостей CocoaPods ==="
           cd ios
-          pod install --repo-update --verbose | tee ../logs/pod_install.log
+          pod install --repo-update
           cd ..
-
-      - name: Очистка кеша
-        script: |
-          echo "=== Очистка кеша Flutter ==="
-          rm -rf ~/.pub-cache
-          flutter pub get
 
       - name: Сборка IPA
         script: |
@@ -58,5 +41,4 @@ workflows:
 
     artifacts:
       - build/ios/ipa/*.ipa
-      - logs/**/*.log
       - ios/Pods/Manifest.lock
