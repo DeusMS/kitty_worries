@@ -24,17 +24,8 @@ workflows:
       - name: Получение зависимостей
         script: flutter pub get
 
-      - name: Генерация podhelper.rb и iOS структуры
-        script: |
-          flutter build ios --no-codesign --debug
-          cp -f .ios/Flutter/podhelper.rb ios/Flutter/ || true
-
-      - name: Проверка наличия podhelper.rb
-        script: |
-          if [ ! -f "ios/Flutter/podhelper.rb" ]; then
-            echo "Файл podhelper.rb не найден!"
-            exit 1
-          fi
+      - name: Генерация iOS артефактов
+        script: flutter build ios --no-codesign --debug
 
       - name: Установка CocoaPods
         script: |
