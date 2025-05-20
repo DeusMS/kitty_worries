@@ -387,7 +387,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = ankit.appsinst.indjag.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 5.5;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/kitty_worries.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/kitty_worries";
 			};
 			name = Debug;
@@ -401,7 +401,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = ankit.appsinst.indjag.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 5.5;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/kitty_worries.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/kitty_worries";
 			};
 			name = Release;
@@ -415,7 +415,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = ankit.appsinst.indjag.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 5.5;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/kitty_worries.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/kitty_worries";
 			};
 			name = Profile;
@@ -484,7 +484,7 @@
 					"@executable_path/../Frameworks",
 				);
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 5.5;
 			};
 			name = Profile;
 		};
@@ -617,7 +617,7 @@
 				);
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 5.5;
 			};
 			name = Debug;
 		};
@@ -636,7 +636,7 @@
 					"@executable_path/../Frameworks",
 				);
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 5.5;
 			};
 			name = Release;
 		};
