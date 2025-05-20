@@ -21,11 +21,6 @@ workflows:
           flutter clean
           rm -rf ios/Pods ios/Podfile.lock
     
-      - name: Создание базового iOS-проекта
-        script: |
-          # Создаем минимальную структуру iOS-проекта
-          flutter create --platforms=ios --no-overwrite .
-    
       - name: Генерация podhelper.rb
         script: |
           # Генерируем iOS-специфичные файлы
