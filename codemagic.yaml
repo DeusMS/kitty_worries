@@ -27,11 +27,11 @@ workflows:
       - name: Генерация iOS артефактов
         script: flutter build ios --no-codesign --debug
 
-      - name: Установка CocoaPods
-        script: |
-          cd ios
-          pod install --repo-update
-          cd ..
+      - name: Повтор pod install (отладка)
+          script: |
+            cd ios
+            pod install --verbose
+            cd ..
       
       - name: Настройка подписи
         script: xcode-project use-profiles
