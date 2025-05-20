@@ -1,7 +1,7 @@
 workflows:
   build-ios:
     name: iOS Release Build
-    max_build_duration: 120  # Увеличиваем таймаут
+    max_build_duration: 120
     environment:
       flutter: 3.27.4
       xcode: 16.3
@@ -20,19 +20,13 @@ workflows:
         script: |
           flutter clean
           rm -rf ios/Pods ios/Podfile.lock
-    
-      - name: Генерация podhelper.rb
-        script: |
-          # Генерируем iOS-специфичные файлы
-          flutter build ios --no-codesign --debug
-          cp -f .ios/Flutter/podhelper.rb ios/Flutter/ || true
-    
-      - name: Проверка файлов
-        script: |
-          echo "Файлы в ios/Flutter:"
-          ls -la ios/Flutter/
-          [ -f "ios/Flutter/podhelper.rb" ] || exit 1
-    
+
+      - name: Получение зависимостей
+        script: flutter pub get
+
+      - name: Генерация iOS артефактов
+        script: flutter build ios --no-codesign --debug
+
       - name: Установка CocoaPods
         script: |
           cd ios
@@ -47,3 +41,4 @@ workflows:
 
     artifacts:
       - build/ios/ipa/*.ipa
+      - flutter_drive.log
