@@ -6,6 +6,7 @@ workflows:
       flutter: 3.27.4
       xcode: 16.3
       vars:
+        CI_PROJECT_DIR: .
         distribution_type: development
         bundle_identifier: "ankit.appsinst.indjag"
       ios_signing:
