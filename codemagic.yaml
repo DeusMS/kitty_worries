@@ -27,8 +27,11 @@ workflows:
       - name: Генерация iOS артефактов
         script: flutter build ios --no-codesign --debug
 
-      - name: Повтор pod install (отладка)
+      - name: Повторный pod install (отладка)
         script: |
+          echo "=== Содержимое ios/ перед pod install ==="
+          ls -la ios/
+          echo "=== Запуск pod install ==="
           cd ios
           pod install --verbose
           cd ..
