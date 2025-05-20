@@ -24,6 +24,12 @@ jobs:
 
       - name: Удалить старую папку .ios (если есть)
         run: rm -rf .ios
+
+      - name: Add GoogleService-Info.plist
+        run: |
+          echo "$GOOGLE_SERVICE_INFO" | base64 --decode > ios/Runner/GoogleService-Info.plist
+        env:
+          GOOGLE_SERVICE_INFO: ${{ secrets.GOOGLE_SERVICE_INFO }}
         
       - name: Очистка и сборка iOS (с генерацией podhelper.rb)
         run: |
