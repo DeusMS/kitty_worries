@@ -22,13 +22,6 @@ target 'Runner' do
   pod 'Firebase/Messaging', '10.24.0'
   pod 'Firebase/Storage', '10.24.0'
 
-  # ⬇️ Важно: явно подключаем Firebase SDK
-  pod 'Firebase/Core'
-  pod 'Firebase/Auth'
-  pod 'Firebase/Firestore'
-  pod 'Firebase/Messaging'
-  pod 'Firebase/Storage'
-
   if defined?(install_all_flutter_pods)
     install_all_flutter_pods(flutter_application_path)
   else
