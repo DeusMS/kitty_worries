@@ -28,10 +28,10 @@ workflows:
         script: flutter build ios --no-codesign --debug
 
       - name: Повтор pod install (отладка)
-          script: |
-            cd ios
-            pod install --verbose
-            cd ..
+        script: |
+          cd ios
+          pod install --verbose
+          cd ..
       
       - name: Настройка подписи
         script: xcode-project use-profiles
