@@ -2,14 +2,15 @@ platform :ios, '15.0'
 
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
+# Абсолютный путь, безопасный в CI
 flutter_application_path = File.expand_path('..', __dir__)
 podhelper_path = File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')
 
-# Гарантированная проверка — предотвращает CI-крэш
+# Только если файл реально существует
 if File.exist?(podhelper_path)
   load(podhelper_path)
 else
-  puts("⚠️ podhelper.rb не найден: #{podhelper_path}")
+  puts "⚠️ podhelper.rb не найден: #{podhelper_path}. Он будет сгенерирован позже командой flutter build ios"
 end
 
 target 'Runner' do
@@ -18,7 +19,7 @@ target 'Runner' do
   if defined?(install_all_flutter_pods)
     install_all_flutter_pods(flutter_application_path)
   else
-    puts "⚠️ install_all_flutter_pods не определён — возможно, podhelper.rb не сгенерирован"
+    puts "⚠️ install_all_flutter_pods не определён. podhelper.rb не загружен?"
   end
 end
 
