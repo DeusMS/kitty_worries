@@ -22,7 +22,38 @@ jobs:
       - name: Создать .ios/Flutter/podhelper.rb вручную
         run: |
           mkdir -p .ios/Flutter
-          echo "require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper.rb'), Dir.pwd)" > .ios/Flutter/podhelper.rb
+          cat > .ios/Flutter/podhelper.rb <<EOF
+          def parse_KV_file(file, separator='=')
+            file_abs_path = File.expand_path(file)
+            if !File.exists? file_abs_path
+              return [];
+            end
+            generated_key_values = {}
+            File.foreach(file_abs_path) do |line|
+              line = line.strip
+              if line.length == 0 || line[0] == "#"
+                next
+              end
+              key_value = line.split(separator)
+              if key_value.length == 2
+                generated_key_values[key_value[0]] = key_value[1]
+              else
+                puts "Invalid line for KV parsing: " + line
+              end
+            end
+            return generated_key_values
+          end
+          
+          def flutter_root
+            generated_key_values = parse_KV_file(File.join(__dir__, '..', '..', 'Flutter', 'Generated.xcconfig'))
+            if generated_key_values.empty?
+              return File.expand_path(File.join(__dir__, '..', '..'))
+            end
+            return generated_key_values['FLUTTER_ROOT']
+          end
+          
+          require File.expand_path(File.join(flutter_root, 'packages', 'flutter_tools', 'bin', 'podhelper.rb'))
+          EOF
           
       - name: Очистка и сборка iOS (с генерацией podhelper.rb)
         run: |
