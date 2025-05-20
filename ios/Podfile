@@ -16,6 +16,7 @@ end
 target 'Runner' do
   use_frameworks! :linkage => :static
   
+  pod 'awesome_notifications'
   pod 'Firebase/Core', '10.24.0'
   pod 'Firebase/Auth', '10.24.0'
   pod 'Firebase/Firestore', '10.24.0'
