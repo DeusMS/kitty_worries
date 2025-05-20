@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+"http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
   <key>method</key>
-  <string>app-store</string>
+  <string>development</string> <!-- Или app-store, если собираешь для TestFlight -->
   <key>signingStyle</key>
-  <string>automatic</string>
-  <key>stripSwiftSymbols</key>
-  <true/>
-  <key>compileBitcode</key>
-  <true/>
-  <key>uploadBitcode</key>
-  <false/>
+  <string>manual</string>
+  <key>teamID</key>
+  <string>JL42FH3732</string>
+  <key>provisioningProfiles</key>
+  <dict>
+    <key>ankit.appsinst.indjag</key>
+    <string>iApps_Pro</string>
+  </dict>
 </dict>
 </plist>
