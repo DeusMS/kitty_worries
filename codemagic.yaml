@@ -5,7 +5,8 @@ workflows:
     max_build_duration: 120
     environment:
       flutter: 3.27.4
-      xcode: 16.3
+      xcode: 15.3
+      cocoapods: default
       vars:
         distribution_type: development
         bundle_identifier: "ankit.appsinst.indjag"
@@ -54,7 +55,15 @@ workflows:
                      -archivePath build/ios/archive/Runner.xcarchive \
                      -exportPath build/ios/ipa \
                      -exportOptionsPlist ExportOptions.plist \
+    
                      CODE_SIGNING_ALLOWED=NO
+    post_build:
+      - name: 🔍 Вывод дерева проекта
+        script: |
+          echo "📁 Структура проекта после сборки:"
+          find . -print
+        always_run: true
+                         
     artifacts:
       - build/ios/ipa/*.ipa
       - ios/Pods/Manifest.lock
