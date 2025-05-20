@@ -1,4 +1,4 @@
-name: Build iOS .ipa for KittyWorries
+ name: Build iOS .ipa for KittyWorries
 
 on:
   workflow_dispatch:
@@ -18,11 +18,14 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
-
+        
+      - name: Создать .ios/Flutter/podhelper.rb вручную
+        run: |
+          mkdir -p .ios/Flutter
+          echo "require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper.rb'), Dir.pwd)" > .ios/Flutter/podhelper.rb
+          
       - name: Очистка и сборка iOS (с генерацией podhelper.rb)
         run: |
-          flutter clean
-          flutter pub get
           flutter build ios --release --no-codesign
 
       - name: Выполнить pod install вручную
