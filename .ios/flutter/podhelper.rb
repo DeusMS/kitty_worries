@@ -1,4 +1,5 @@
 require 'fileutils'
+require 'json'
 
 def install_all_flutter_pods(flutter_application_path)
   flutter_ios_engine_podspec = File.expand_path(File.join(flutter_application_path, '.ios', 'Flutter', 'engine', 'Flutter.podspec'))
