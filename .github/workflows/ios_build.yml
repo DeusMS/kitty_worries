@@ -19,10 +19,22 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
         
-      - name: Проверка регистрации awesome_notifications
-        run: |
-          cat .flutter-plugins | grep awesome_notifications || echo "❌ Плагин не зарегистрирован"
+      - name: Clean old build artifacts
+        run: flutter clean
       
+      - name: Install dependencies
+        run: flutter pub get
+      
+      - name: Regenerate iOS plugin registrant
+        run: flutter build ios-framework --no-universal
+      
+      - name: Проверка регистрации awesome_notifications в GeneratedPluginRegistrant
+        run: |
+          if grep -q awesome_notifications ios/Flutter/GeneratedPluginRegistrant.*; then
+            echo "✅ awesome_notifications зарегистрирован"
+          else
+            echo "❌ awesome_notifications не зарегистрирован"
+            exit 1
       - name: 📄 Показать текущий Podfile
         run: cat ios/Podfile
 
