@@ -46,6 +46,15 @@ jobs:
       - name: Созадем iOS (verbose)
         run: flutter build ios --no-codesign --debug -v > flutter_ios_build.log || true
       
+      - name: Show generated iOS files
+        run: |
+          ls -l ios/Flutter/
+          cat ios/Flutter/Generated.xcconfig || echo "No Generated.xcconfig"
+          cat ios/Flutter/GeneratedPluginRegistrant.m || echo "No GeneratedPluginRegistrant.m"
+
+      - name: Build release IPA
+        run: flutter build ios --release --no-codesign      
+
       - name: Install CocoaPods dependencies
         working-directory: ios
         run: |
