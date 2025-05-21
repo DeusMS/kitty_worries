@@ -38,7 +38,14 @@ jobs:
       - name: Build iOS (verbose)
         run: |
           flutter build ios --release --no-codesign -v > flutter_ios_build.log || true
-      
+
+      - name: Диагностика после сборки
+        run: |
+          ls -la ios
+          cat ios/Podfile.lock || echo "❌ Podfile.lock не найден"
+          cat ios/Flutter/Generated.xcconfig || echo "❌ Generated.xcconfig не найден"
+          grep awesome_notifications ios/Flutter/GeneratedPluginRegistrant.* || echo "❌ awesome_notifications не зарегистрирован"
+            
       - name: Upload build log
         uses: actions/upload-artifact@v4
         with:
