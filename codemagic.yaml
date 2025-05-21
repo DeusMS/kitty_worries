@@ -24,6 +24,10 @@ workflows:
           echo "=== Очистка проекта ==="
           flutter clean
           rm -rf ios/Pods ios/Podfile.lock
+
+      - name: Проверка регистрации awesome_notifications
+        run: |
+          cat .flutter-plugins | grep awesome_notifications || echo "❌ Плагин не зарегистрирован"
     
       - name: Получение зависимостей Flutter
         script: |
