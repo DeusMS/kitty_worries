@@ -31,6 +31,9 @@ jobs:
           rm -rf ios/Podfile.lock
           rm -rf ios/.symlinks   
 
+      - name: Force recreate iOS
+        run: flutter create --platforms=ios .
+
       - name: Устанавливаем зависимости
         run: flutter pub get
 
