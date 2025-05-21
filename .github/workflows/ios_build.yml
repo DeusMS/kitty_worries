@@ -49,6 +49,9 @@ jobs:
       - name: Созадем iOS (verbose)
         run: flutter build ios --no-codesign --debug -v > flutter_ios_build.log || true
       
+      - name: Проверка папки
+        run: ls -la ios/Flutter/      
+
       - name: Show generated iOS files
         run: |
           ls -l ios/Flutter/
