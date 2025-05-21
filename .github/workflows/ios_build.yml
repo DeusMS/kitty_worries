@@ -16,9 +16,6 @@ jobs:
         with:
           flutter-version: '3.27.4'
 
-      - name: Install dependencies
-        run: flutter pub get
-        
       - name: Clean old build artifacts
         run: flutter clean
       
