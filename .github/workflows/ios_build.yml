@@ -42,6 +42,9 @@ jobs:
           echo "$GOOGLE_SERVICE_INFO" | base64 --decode > ios/Runner/GoogleService-Info.plist
         env:
           GOOGLE_SERVICE_INFO: ${{ secrets.GOOGLE_SERVICE_INFO }} 
+      
+      - name: Ensure iOS plugin registration
+        run: flutter gen-l10n && flutter pub get && flutter packages pub run build_runner build --delete-conflicting-outputs || true    
 
       - name: Созадем iOS (verbose)
         run: flutter build ios --no-codesign --debug -v > flutter_ios_build.log || true
