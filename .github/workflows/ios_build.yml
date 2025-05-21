@@ -37,9 +37,6 @@ jobs:
       - name: Устанавливаем зависимости
         run: flutter pub get
 
-      - name: 📄 Показать текущий Podfile
-        run: cat ios/Podfile
-
       - name: Добавляем GoogleService-Info.plist
         run: |
           echo "$GOOGLE_SERVICE_INFO" | base64 --decode > ios/Runner/GoogleService-Info.plist
@@ -55,6 +52,9 @@ jobs:
       
       - name: Созадем iOS (verbose)
         run: flutter build ios --no-codesign --debug -v > flutter_ios_build.log || true
+
+      - name: 📄 Показать текущий Podfile
+        run: cat ios/Podfile
       
       - name: Проверка папки
         run: ls -la ios/Flutter/      
