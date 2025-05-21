@@ -18,13 +18,16 @@ jobs:
 
       - name: Clean old build artifacts
         run: flutter clean
-      
+
+      - name: Удалить старую папку .ios (если есть)
+        run: rm -rf .ios
+
       - name: Install dependencies
         run: flutter pub get
-      
+
       - name: Regenerate iOS plugin registrant
         run: flutter build ios-framework --no-universal
-      
+
       - name: Проверка регистрации awesome_notifications в GeneratedPluginRegistrant
         run: |
           if grep -q awesome_notifications ios/Flutter/GeneratedPluginRegistrant.*; then
@@ -32,22 +35,27 @@ jobs:
           else
             echo "❌ awesome_notifications не зарегистрирован"
             exit 1
+
+      - name: Update CocoaPods repo
+        run: pod repo update
+
       - name: 📄 Показать текущий Podfile
         run: cat ios/Podfile
-
-      - name: Удалить старую папку .ios (если есть)
-        run: rm -rf .ios
 
       - name: Add GoogleService-Info.plist
         run: |
           echo "$GOOGLE_SERVICE_INFO" | base64 --decode > ios/Runner/GoogleService-Info.plist
         env:
           GOOGLE_SERVICE_INFO: ${{ secrets.GOOGLE_SERVICE_INFO }}
-        
+
+      - name: Run pod install
+        run: |
+          cd ios
+          pod install
+
       - name: Build iOS (verbose)
         run: |
           flutter build ios --release --no-codesign -v > flutter_ios_build.log || true
-
       - name: Диагностика после сборки
         run: |
           ls -la ios
