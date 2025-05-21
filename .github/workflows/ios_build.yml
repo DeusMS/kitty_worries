@@ -32,7 +32,7 @@ jobs:
           rm -rf ios/.symlinks   
 
       - name: Force recreate iOS
-        run: flutter create --platforms=ios --org ankit.appsinst.indjag
+        run: flutter create --platforms=ios --org ankit.appsinst.indjag .
 
       - name: Устанавливаем зависимости
         run: flutter pub get
