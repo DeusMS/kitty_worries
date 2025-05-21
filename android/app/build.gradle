@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.kitty_worries"
+    namespace = "ankit.appsinst.indjag"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
