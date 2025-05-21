@@ -47,7 +47,7 @@ class _ShareListBottomSheetState extends State<ShareListBottomSheet> {
       }
     });
   }
-
+  
   Future<void> _save() async {
     await ListService.updateSharedWith(widget.listId, selectedUids.toList());
     if (context.mounted) Navigator.of(context).pop();

@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/user.dart'; // <— добавь этот импорт
+import 'package:flutter/foundation.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -41,7 +41,7 @@ class AuthService {
 
   /// Сохраняет пользователя в Firestore (если ещё не сохранён)
   Future<void> _saveUserToFirestore(User user) async {
-  final docRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
+  final docRef = _firestore.collection('users').doc(user.uid);
   final doc = await docRef.get();
 
   if (!doc.exists) {
@@ -49,9 +49,13 @@ class AuthService {
       'email': user.email ?? 'unknown',
       'createdAt': FieldValue.serverTimestamp(), // опционально
     });
-    print('✅ User document created in Firestore');
+    if (kDebugMode) {
+      debugPrint('✅ User document created in Firestore');
+    }  
   } else {
-    print('ℹ️ User document already exists');
+    if (kDebugMode) {
+      debugPrint('ℹ️ User document already exists');
+    }
   }
 }
 

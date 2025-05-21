@@ -6,8 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import '../providers/task_provider.dart';
 import '../screens/home_screen.dart';
 import '../services/user_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../models/task_group.dart';
+//import 'package:firebase_auth/firebase_auth.dart'; используется для "currentUid" пока закоментил т.к. не использую
 
 class CustomDrawer extends StatefulWidget {
   const CustomDrawer({super.key});
@@ -146,10 +145,10 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 itemCount: taskProvider.customLists.length,
                 itemBuilder: (context, index) {
                   final listName = taskProvider.customLists[index];
-                  final group = taskProvider.customLists[index];
+                  //final group = taskProvider.customLists[index];
 
                   //final listTitle = group.name;
-                  //final listOwnerId = group.ownerId;
+                  //final listOwnerId = group.ownerId; Разобраться с кодом!!!
                   return ListTile(
                     dense: true,
                     leading: Icon(Icons.folder, size: 20, color: theme.hintColor),
@@ -165,6 +164,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                       );
                     },
                     onLongPress: () async {
+                      final taskProvider = Provider.of<TaskProvider>(context, listen: false); // ✅ сохранить ДО await
                       final action = await showModalBottomSheet<String>(
                         context: context,
                         builder: (ctx) => Column(
@@ -188,36 +188,20 @@ class _CustomDrawerState extends State<CustomDrawer> {
                           ],
                         ),
                       );
+
                       if (!mounted) return;
+
                       if (action == 'share') {
-                        final currentUid = FirebaseAuth.instance.currentUser?.uid;
+                        final listId = await taskProvider.getListIdByName(listName);
+                        if (listId == null || !mounted) return;
 
-                        final listId = await Provider.of<TaskProvider>(context, listen: false)
-                            .getListIdByName(listName);
-                        if (listId == null) return; // ✅ проверка на null
-
-                        final sharedWith = await Provider.of<TaskProvider>(context, listen: false)
-                            .getSharedWithByListId(listId);
-                        if (!context.mounted) return;
+                        final sharedWith = await taskProvider.getSharedWithByListId(listId);
+                        if (!mounted) return;
 
                         showModalBottomSheet(
                           context: context,
                           builder: (_) => ShareListBottomSheet(
-                            listId: listId,                    // ✅ уверенно приводим к String
-                            initiallyShared: sharedWith,        // ✅ обязательный параметр
-                          ),
-                        );
-                      } else if (action == 'share') {
-                        final id = await Provider.of<TaskProvider>(context, listen: false)
-                            .getListIdByName(listName);
-                        if (id == null) return;
-                        final sharedWith = await Provider.of<TaskProvider>(context, listen: false)
-                            .getSharedWithByListId(id);
-                        if (!context.mounted) return;
-                        showModalBottomSheet(
-                          context: context,
-                          builder: (_) => ShareListBottomSheet(
-                            listId: id,
+                            listId: listId,
                             initiallyShared: sharedWith,
                           ),
                         );
@@ -234,15 +218,15 @@ class _CustomDrawerState extends State<CustomDrawer> {
                             ],
                           ),
                         );
-                        
-                        if (context.mounted) {
-                          if (newName != null && newName.trim().isNotEmpty && newName != listName) {
-                            await Provider.of<TaskProvider>(context, listen: false).renameList(listName, newName.trim());
-                          }
+
+                        if (!mounted) return;
+
+                        if (newName != null &&
+                            newName.trim().isNotEmpty &&
+                            newName != listName) {
+                          await taskProvider.renameList(listName, newName.trim());
                         }
-                      }
-                      if (!mounted) return;
-                      if (action == 'delete') {
+                      } else if (action == 'delete') {
                         final confirm = await showDialog<bool>(
                           context: context,
                           builder: (ctx) => AlertDialog(
@@ -255,11 +239,11 @@ class _CustomDrawerState extends State<CustomDrawer> {
                           ),
                         );
 
-                        if (context.mounted) {
-                          if (confirm == true) {
-                            await Provider.of<TaskProvider>(context, listen: false).deleteList(listName);
-                          }
-                        }                          
+                        if (!mounted) return;
+
+                        if (confirm == true) {
+                          await taskProvider.deleteList(listName);
+                        }
                       }
                     },
                   );

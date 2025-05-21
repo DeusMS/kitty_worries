@@ -55,5 +55,7 @@
 	<array>
 	<string>remote-notification</string>
 	</array>
+	<key>NSUserNotificationUsageDescription</key>
+	<string>Мы используем уведомления, чтобы информировать вас.</string>
 </dict>
 </plist>

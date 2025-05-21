@@ -164,11 +164,14 @@ class TaskProvider with ChangeNotifier {
 
   Future<void> loadTasksFromUserForList(String listName, String ownerId) async {
     final query = await FirebaseFirestore.instance
-    .collection('users')
-    .doc(ownerId) // ✅ не currentUser!
-    .collection('tasks')
-    .where('list', isEqualTo: listName)
-    .get();
+      .collection('users')
+      .doc(ownerId) // ✅ не currentUser!
+      .collection('tasks')
+      .where('list', isEqualTo: listName)
+      .get();
+    _tasks.clear();
+    _tasks.addAll(query.docs.map((doc) => Task.fromMap(doc.data())));
+    notifyListeners();
   }
 
   Future<String?> getListIdByName(String name) async {

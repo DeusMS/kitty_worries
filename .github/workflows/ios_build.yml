@@ -11,9 +11,6 @@ jobs:
       - name: Проверяем репозиторий
         uses: actions/checkout@v3
 
-      - name: Select Xcode
-        run: sudo xcode-select -switch /Applications/Xcode_15.3.app
-
       - name: Устанавливаем Flutter
         uses: subosito/flutter-action@v2
         with:
