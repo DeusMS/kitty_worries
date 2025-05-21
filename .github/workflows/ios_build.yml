@@ -36,8 +36,17 @@ jobs:
           GOOGLE_SERVICE_INFO: ${{ secrets.GOOGLE_SERVICE_INFO }}
         
       - name: Очистка и сборка iOS (с генерацией podhelper.rb)
+          run: flutter build ios --release --no-codesign -v
+
+      - name: Check if build succeeded
+        if: success()
+        run: echo "✅ Flutter iOS build OK"
+      
+      - name: Run pod install
+        if: success()
         run: |
-          flutter build ios --release --no-codesign
+          cd ios
+          pod install
 
       - name: Decode and install certificate
         run: |
