@@ -35,8 +35,15 @@ jobs:
         env:
           GOOGLE_SERVICE_INFO: ${{ secrets.GOOGLE_SERVICE_INFO }}
         
-      - name: Сборка iOS (с генерацией podhelper.rb)
-        run: flutter build ios --release --no-codesign -v
+      - name: Build iOS (verbose)
+        run: |
+          flutter build ios --release --no-codesign -v > flutter_ios_build.log || true
+      
+      - name: Upload build log
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-ios-build-log
+          path: flutter_ios_build.log
 
       - name: Check if build succeeded
         if: success()
