@@ -8,43 +8,59 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - name: Checkout repository
+      - name: Проверяем репозиторий
         uses: actions/checkout@v3
 
-      - name: Set up Flutter
+      - name: Устанавливаем Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.27.4'
 
-      - name: Clean old build artifacts
+      - name: Удалить старую папку .ios (если есть)
+        run: rm -rf .ios 
+
+      - name: Кэшируем артефакты iOS
+        run: flutter precache --ios
+
+      - name: Очистка flutter
         run: flutter clean
 
-      - name: Удалить старую папку .ios (если есть)
-        run: rm -rf .ios
+      - name: Удалить старые CocoaPods
+        run: |
+          rm -rf ios/Pods
+          rm -rf ios/Podfile.lock
+          rm -rf ios/.symlinks   
 
-      - name: Install dependencies
+      - name: Устанавливаем зависимости
         run: flutter pub get
 
-      - name: Update CocoaPods repo
+      - name: Обновляет все зависимости
+        run: flutter pub upgrade  
+
+      - name: Обновляем CocoaPods repo
         run: pod repo update
 
       - name: 📄 Показать текущий Podfile
         run: cat ios/Podfile
 
-      - name: Add GoogleService-Info.plist
+      - name: Добавляем GoogleService-Info.plist
         run: |
           echo "$GOOGLE_SERVICE_INFO" | base64 --decode > ios/Runner/GoogleService-Info.plist
         env:
           GOOGLE_SERVICE_INFO: ${{ secrets.GOOGLE_SERVICE_INFO }}
 
-      - name: Run pod install
+      - name: Запускаем pod install
         run: |
           cd ios
           pod install
 
-      - name: Build iOS (verbose)
+      - name: Созадем iOS (verbose)
         run: |
           flutter build ios --release --no-codesign -v > flutter_ios_build.log || true
+
+      - name: Проверяем PluginRegistrant content
+        run: |
+          cat ios/Runner/GeneratedPluginRegistrant.swift || echo "❌ Файл не найден"
 
       - name: Диагностика после сборки
         run: |
