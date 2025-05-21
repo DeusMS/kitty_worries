@@ -37,9 +37,6 @@ jobs:
       - name: Обновляет все зависимости
         run: flutter pub upgrade  
 
-      - name: Обновляем CocoaPods repo
-        run: pod repo update
-
       - name: 📄 Показать текущий Podfile
         run: cat ios/Podfile
 
@@ -53,6 +50,12 @@ jobs:
         run: |
           cd ios
           pod install
+
+      - name: Install CocoaPods dependencies
+        working-directory: ios
+        run: |
+          pod repo update
+          pod install --verbose --no-repo-update    
 
       - name: Созадем iOS (verbose)
         run: |
