@@ -18,7 +18,11 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
-
+        
+      - name: Проверка регистрации awesome_notifications
+        run: |
+          cat .flutter-plugins | grep awesome_notifications || echo "❌ Плагин не зарегистрирован"
+      
       - name: 📄 Показать текущий Podfile
         run: cat ios/Podfile
 
