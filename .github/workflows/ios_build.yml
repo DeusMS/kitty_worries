@@ -36,7 +36,7 @@ jobs:
           GOOGLE_SERVICE_INFO: ${{ secrets.GOOGLE_SERVICE_INFO }}
         
       - name: Сборка iOS (с генерацией podhelper.rb)
-          run: flutter build ios --release --no-codesign -v
+        run: flutter build ios --release --no-codesign -v
 
       - name: Check if build succeeded
         if: success()
