@@ -137,8 +137,9 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
 
-      - name: Manually create .ipa
+      - name: Manually create .ipa from .app
         run: |
+          mkdir -p build/ios/ipa
           mkdir -p Payload
           cp -r build/ios/archive.xcarchive/Products/Applications/Runner.app Payload/
           zip -r build/ios/ipa/Runner.ipa Payload
