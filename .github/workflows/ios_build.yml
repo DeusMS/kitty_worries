@@ -126,20 +126,26 @@ jobs:
         env:
           IOS_PROVISIONING_PROFILE: ${{ secrets.IOS_PROVISIONING_PROFILE }}
 
-      - name: Archive with Xcode
+      - name: Build iOS .xcarchive (no codesign)
         run: |
           xcodebuild -workspace ios/Runner.xcworkspace \
-                     -scheme Runner \
-                     -configuration Release \
-                     -archivePath build/ios/archive.xcarchive \
-                     archive
-
-      - name: Export signed .ipa
+            -scheme Runner \
+            -configuration Release \
+            -archivePath build/ios/archive.xcarchive \
+            archive \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+      
+      - name: Export .ipa without signing
         run: |
           xcodebuild -exportArchive \
-                     -archivePath build/ios/archive.xcarchive \
-                     -exportOptionsPlist ios/ExportOptions.plist \
-                     -exportPath build/ios/ipa
+            -archivePath build/ios/archive.xcarchive \
+            -exportOptionsPlist ios/ExportOptions.plist \
+            -exportPath build/ios/ipa \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
