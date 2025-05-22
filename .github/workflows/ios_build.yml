@@ -31,120 +31,120 @@ jobs:
           rm -rf ios/Podfile.lock
           rm -rf ios/.symlinks   
 
-      - name: Force recreate iOS
-        run: flutter create --platforms=ios --org ankit.appsinst.indjag --ios-language objc .
+      # - name: Force recreate iOS
+      #   run: flutter create --platforms=ios --org ankit.appsinst.indjag --ios-language objc .
         
-      - name: Upload iOS folder as artifact
+      # - name: Upload iOS folder as artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: ios-folder
+      #     path: ios
+  
+      - name: Устанавливаем зависимости
+        run: flutter pub get
+
+      - name: Добавляем GoogleService-Info.plist
+        run: |
+          echo "$GOOGLE_SERVICE_INFO" | base64 --decode > ios/Runner/GoogleService-Info.plist
+        env:
+          GOOGLE_SERVICE_INFO: ${{ secrets.GOOGLE_SERVICE_INFO }} 
+      
+      - name: Ensure iOS plugin registration
+        run: flutter gen-l10n && flutter pub get && flutter packages pub run build_runner build --delete-conflicting-outputs || true    
+
+      - name: Set minimum iOS version
+        run: |
+          echo "IPHONEOS_DEPLOYMENT_TARGET=15.0" >> ios/Flutter/Generated.xcconfig
+      
+      - name: Созадем iOS (verbose)
+        run: flutter build ios --no-codesign --debug -v > flutter_ios_build.log || true
+
+      - name: 📄 Показать текущий Podfile
+        run: cat ios/Podfile
+      
+      - name: Проверка папки
+        run: ls -la ios/Flutter/      
+
+      - name: Show generated iOS files
+        run: |
+          ls -l ios/Flutter/
+          cat ios/Flutter/Generated.xcconfig || echo "No Generated.xcconfig"
+          cat ios/Flutter/GeneratedPluginRegistrant.m || echo "No GeneratedPluginRegistrant.m"
+
+      - name: Build release IPA
+        run: flutter build ios --release --no-codesign      
+
+      - name: Install CocoaPods dependencies
+        working-directory: ios
+        run: |
+          pod repo update
+          pod install --verbose --no-repo-update         
+
+      - name: Проверяем PluginRegistrant content
+        run: |
+          cat ios/Runner/GeneratedPluginRegistrant.swift || echo "❌ Файл не найден"
+
+      - name: Диагностика после сборки
+        run: |
+          ls -la ios
+          cat ios/Podfile.lock || echo "❌ Podfile.lock не найден"
+          cat ios/Flutter/Generated.xcconfig || echo "❌ Generated.xcconfig не найден"
+          grep awesome_notifications ios/Flutter/GeneratedPluginRegistrant.* || echo "❌ awesome_notifications не зарегистрирован"
+            
+      - name: Upload build log
         uses: actions/upload-artifact@v4
         with:
-          name: ios-folder
-          path: ios
-  
-      # - name: Устанавливаем зависимости
-      #   run: flutter pub get
+          name: flutter-ios-build-log
+          path: flutter_ios_build.log
 
-      # - name: Добавляем GoogleService-Info.plist
-      #   run: |
-      #     echo "$GOOGLE_SERVICE_INFO" | base64 --decode > ios/Runner/GoogleService-Info.plist
-      #   env:
-      #     GOOGLE_SERVICE_INFO: ${{ secrets.GOOGLE_SERVICE_INFO }} 
+      - name: Check if build succeeded
+        if: success()
+        run: echo "✅ Flutter iOS build OK"
       
-      # - name: Ensure iOS plugin registration
-      #   run: flutter gen-l10n && flutter pub get && flutter packages pub run build_runner build --delete-conflicting-outputs || true    
+      - name: Run pod install
+        if: success()
+        run: |
+          cd ios
+          pod install
 
-      # - name: Set minimum iOS version
-      #   run: |
-      #     echo "IPHONEOS_DEPLOYMENT_TARGET=15.0" >> ios/Flutter/Generated.xcconfig
-      
-      # - name: Созадем iOS (verbose)
-      #   run: flutter build ios --no-codesign --debug -v > flutter_ios_build.log || true
+      - name: Decode and install certificate
+        run: |
+          echo "$IOS_CERTIFICATE_P12" | base64 --decode > certificate.p12
+          security create-keychain -p "pass" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "pass" build.keychain
+          security import certificate.p12 -k build.keychain -P "$IOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "pass" build.keychain
+        env:
+          IOS_CERTIFICATE_P12: ${{ secrets.IOS_CERTIFICATE_P12 }}
+          IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
 
-      # - name: 📄 Показать текущий Podfile
-      #   run: cat ios/Podfile
-      
-      # - name: Проверка папки
-      #   run: ls -la ios/Flutter/      
+      - name: Decode and install provisioning profile
+        run: |
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo "$IOS_PROVISIONING_PROFILE" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
+        env:
+          IOS_PROVISIONING_PROFILE: ${{ secrets.IOS_PROVISIONING_PROFILE }}
 
-      # - name: Show generated iOS files
-      #   run: |
-      #     ls -l ios/Flutter/
-      #     cat ios/Flutter/Generated.xcconfig || echo "No Generated.xcconfig"
-      #     cat ios/Flutter/GeneratedPluginRegistrant.m || echo "No GeneratedPluginRegistrant.m"
+      - name: Archive with Xcode
+        run: |
+          xcodebuild -workspace ios/Runner.xcworkspace \
+                     -scheme Runner \
+                     -configuration Release \
+                     -archivePath build/ios/archive.xcarchive \
+                     archive
 
-      # - name: Build release IPA
-      #   run: flutter build ios --release --no-codesign      
+      - name: Export signed .ipa
+        run: |
+          xcodebuild -exportArchive \
+                     -archivePath build/ios/archive.xcarchive \
+                     -exportOptionsPlist ios/ExportOptions.plist \
+                     -exportPath build/ios/ipa
 
-      # - name: Install CocoaPods dependencies
-      #   working-directory: ios
-      #   run: |
-      #     pod repo update
-      #     pod install --verbose --no-repo-update         
-
-      # - name: Проверяем PluginRegistrant content
-      #   run: |
-      #     cat ios/Runner/GeneratedPluginRegistrant.swift || echo "❌ Файл не найден"
-
-      # - name: Диагностика после сборки
-      #   run: |
-      #     ls -la ios
-      #     cat ios/Podfile.lock || echo "❌ Podfile.lock не найден"
-      #     cat ios/Flutter/Generated.xcconfig || echo "❌ Generated.xcconfig не найден"
-      #     grep awesome_notifications ios/Flutter/GeneratedPluginRegistrant.* || echo "❌ awesome_notifications не зарегистрирован"
-            
-      # - name: Upload build log
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: flutter-ios-build-log
-      #     path: flutter_ios_build.log
-
-      # - name: Check if build succeeded
-      #   if: success()
-      #   run: echo "✅ Flutter iOS build OK"
-      
-      # - name: Run pod install
-      #   if: success()
-      #   run: |
-      #     cd ios
-      #     pod install
-
-      # - name: Decode and install certificate
-      #   run: |
-      #     echo "$IOS_CERTIFICATE_P12" | base64 --decode > certificate.p12
-      #     security create-keychain -p "pass" build.keychain
-      #     security default-keychain -s build.keychain
-      #     security unlock-keychain -p "pass" build.keychain
-      #     security import certificate.p12 -k build.keychain -P "$IOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
-      #     security set-key-partition-list -S apple-tool:,apple: -s -k "pass" build.keychain
-      #   env:
-      #     IOS_CERTIFICATE_P12: ${{ secrets.IOS_CERTIFICATE_P12 }}
-      #     IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
-
-      # - name: Decode and install provisioning profile
-      #   run: |
-      #     mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-      #     echo "$IOS_PROVISIONING_PROFILE" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
-      #   env:
-      #     IOS_PROVISIONING_PROFILE: ${{ secrets.IOS_PROVISIONING_PROFILE }}
-
-      # - name: Archive with Xcode
-      #   run: |
-      #     xcodebuild -workspace ios/Runner.xcworkspace \
-      #                -scheme Runner \
-      #                -configuration Release \
-      #                -archivePath build/ios/archive.xcarchive \
-      #                archive
-
-      # - name: Export signed .ipa
-      #   run: |
-      #     xcodebuild -exportArchive \
-      #                -archivePath build/ios/archive.xcarchive \
-      #                -exportOptionsPlist ios/ExportOptions.plist \
-      #                -exportPath build/ios/ipa
-
-      # - name: Upload IPA artifact
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: ios-ipa
-      #     path: build/ios/ipa
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa
+          path: build/ios/ipa
 
 
