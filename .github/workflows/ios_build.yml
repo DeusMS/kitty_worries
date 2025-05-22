@@ -136,16 +136,6 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
-      
-      - name: Export .ipa without signing
-        run: |
-          xcodebuild -exportArchive \
-            -archivePath build/ios/archive.xcarchive \
-            -exportOptionsPlist ios/ExportOptions.plist \
-            -exportPath build/ios/ipa \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
