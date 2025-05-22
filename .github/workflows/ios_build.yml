@@ -56,8 +56,8 @@ jobs:
         run: |
           echo "IPHONEOS_DEPLOYMENT_TARGET=15.0" >> ios/Flutter/Generated.xcconfig
       
-      - name: Созадем iOS (verbose)
-        run: flutter build ios --no-codesign --debug -v > flutter_ios_build.log || true
+      #- name: Созадем iOS (verbose)
+        #run: flutter build ios --no-codesign --debug -v > flutter_ios_build.log || true
 
       #- name: 📄 Показать текущий Podfile
         #run: cat ios/Podfile
