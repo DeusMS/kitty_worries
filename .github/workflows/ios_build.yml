@@ -31,14 +31,14 @@ jobs:
           rm -rf ios/Podfile.lock
           rm -rf ios/.symlinks   
 
-      - name: Force recreate iOS
-        run: flutter create --platforms=ios --org ankit.appsinst.indjag .
+      # - name: Force recreate iOS
+      #   run: flutter create --platforms=ios --org ankit.appsinst.indjag .
         
-      - name: Upload iOS folder as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-folder
-          path: ios
+      # - name: Upload iOS folder as artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: ios-folder
+      #     path: ios
   
       - name: Устанавливаем зависимости
         run: flutter pub get
