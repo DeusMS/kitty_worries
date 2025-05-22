@@ -132,11 +132,17 @@ jobs:
             -scheme Runner \
             -configuration Release \
             -archivePath build/ios/archive.xcarchive \
-            -exportPath build/ios/ipa
             archive \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
+
+      - name: Export .ipa from archive
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath build/ios/archive.xcarchive \
+            -exportOptionsPlist ios/ExportOptions.plist \
+            -exportPath build/ios/ipa
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
