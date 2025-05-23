@@ -17,6 +17,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'services/notification_service.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/foundation.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,6 +41,9 @@ void main() async {
     ],
     debug: true,
   );
+	
+	// Перехватываем все Flutter ошибки
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
 
   await NotificationService.requestPermission();
   tz.initializeTimeZones();
