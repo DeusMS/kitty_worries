@@ -1,13 +1,14 @@
 //import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import '../models/task.dart';
 import '../services/list_service.dart';
 import '../services/firebase_task_service.dart';
-import '../services/fcm_service.dart';
+//import '../services/fcm_service.dart';
 import '../services/notification_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class TaskProvider with ChangeNotifier {
   final List<Task> _tasks = [];
@@ -106,19 +107,8 @@ class TaskProvider with ChangeNotifier {
       final taskWithId = await FirebaseTaskService().addTask(uid, task);
       _tasks.add(taskWithId);
       notifyListeners();
-      await FcmService.sendTaskNotification('Задача создана', taskWithId);
-
-      if (taskWithId.date != null && taskWithId.date!.isAfter(DateTime.now())) {
-        if (kDebugMode) {
-          debugPrint('📅 Запланировано уведомление на ${taskWithId.date}');
-        }
-        await NotificationService.schedule(
-          id: taskWithId.hashCode,
-          title: 'Напоминание',
-          body: taskWithId.title,
-          scheduledDate: taskWithId.date!,
-        );
-      }
+      //await FcmService.sendTaskNotification('Задача создана', taskWithId);
+      await scheduleNotification(taskWithId);
     }
   }
 
@@ -131,21 +121,10 @@ class TaskProvider with ChangeNotifier {
       final uid = FirebaseAuth.instance.currentUser?.uid;
       if (uid != null && task.id != null) {
         await FirebaseTaskService().updateTask(uid, task.id!, task);
-        await FcmService.sendTaskNotification('Задача обновлена', task);
+        //await FcmService.sendTaskNotification('Задача обновлена', task);
 
-        // Обновляем уведомление
         await NotificationService.cancel(task.hashCode);
-        if (task.date != null && task.date!.isAfter(DateTime.now())) {
-          if (kDebugMode) {
-            debugPrint('📅 Обновленно уведомление на ${task.date}');
-          }  
-          await NotificationService.schedule(
-            id: task.hashCode,
-            title: 'Напоминание',
-            body: task.title,
-            scheduledDate: task.date!,
-          );
-        }
+        await scheduleNotification(task);
       }
     }
   }
@@ -157,7 +136,10 @@ class TaskProvider with ChangeNotifier {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid != null && task.id != null) {
       await FirebaseTaskService().deleteTask(uid, task.id!);
-      await FcmService.sendTaskNotification('Задача удалена', task);
+      if (kIsWeb) {
+        await NotificationService.cancel(task.hashCode);
+        }
+      //await FcmService.sendTaskNotification('Задача удалена', task);
       await NotificationService.cancel(task.hashCode);
     }
   }
@@ -188,5 +170,56 @@ class TaskProvider with ChangeNotifier {
     final lists = await ListService.getAccessibleLists();
     final match = lists.firstWhere((list) => list['id'] == id, orElse: () => {});
     return List<String>.from(match['sharedWith'] ?? []);
+  }
+  Future<void> scheduleNotification(Task task) async {
+    if (kDebugMode) {
+      debugPrint("📦 scheduleNotification вызван: ${task.title}");
+      debugPrint("📅 Дата задачи: ${task.date}");
+      debugPrint("🕓 Сейчас: ${DateTime.now()}");
+    }
+
+    if (task.date == null || task.date!.isBefore(DateTime.now())) {
+      if (kDebugMode) {
+        debugPrint("❌ Пропуск уведомления: дата не указана или в прошлом");
+      }  
+      return;
+    }
+    if (kIsWeb) {
+      // Web → Telegram bot
+      final url = Uri.parse("https://telegramm-bot-notification.onrender.com/notify");
+      final payload = {
+        "chat_id": 793549413,
+        "text": task.title,
+        "notify_at": task.date!.toUtc().toIso8601String(),
+      };
+      try {
+        final res = await http.post(
+          url,
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode(payload),
+        );
+        if (res.statusCode == 200) {
+          if (kDebugMode) {
+            debugPrint("🔔 Уведомление отправлено через Telegram Bot");
+          }
+        } else {
+          if (kDebugMode) {
+            debugPrint("⚠️ Ошибка Telegram Bot: \${res.body}");
+          }
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint("❌ Telegram error: $e");
+        }
+      }
+    } else {
+      // Android/iOS → локальное уведомление
+      await NotificationService.schedule(
+        id: task.hashCode,
+        title: 'Напоминание',
+        body: task.title,
+        scheduledDate: task.date!,
+      );
+    }
   }
 }

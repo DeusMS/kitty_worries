@@ -54,7 +54,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 shape: BoxShape.circle,
               ),
               todayDecoration: BoxDecoration(
-                color: Colors.orange,
+                color: Color.fromARGB(255, 20, 147, 197),
                 shape: BoxShape.circle,
               ),
             ),

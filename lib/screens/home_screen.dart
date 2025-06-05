@@ -28,6 +28,36 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
+class MyPage extends StatelessWidget {
+  final String? listName;
+  final String? customTitle;
+
+  const MyPage({super.key, this.listName, this.customTitle});
+
+  String _getTitle() {
+    return listName ?? 'Без имени';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          customTitle ?? listName ?? _getTitle(),
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        backgroundColor: const Color(0xFFF5F5F7),
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black87),
+      ),
+    );
+  } 
+}
+
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   bool _initialized = false;
@@ -104,19 +134,6 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.listName ?? _getTitle(),
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-        backgroundColor: const Color(0xFFF5F5F7),
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black87),
-      ),
       drawer: const CustomDrawer(),
       body: screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(

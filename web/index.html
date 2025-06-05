@@ -22,18 +22,60 @@
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="kitty_worries">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kitty Worries">
+  <link rel="apple-touch-icon" href="icons/Icon-180.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/png" href="Icon-180.png"/>
 
   <title>kitty_worries</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#000000">
+
+  <style>
+    #gif-loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    #gif-loader img {
+      width: 600px;
+      height: auto;
+      animation: fadeInOut 2s ease-in-out infinite;
+    }
+
+    @keyframes fadeInOut {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+  </style>
+
 </head>
+
 <body>
+  <!-- 🐾 Гифка-заглушка -->
+  <div id="gif-loader">
+    <img src="cat.gif" alt="Загрузка..." />
+  </div>
+  
   <script src="flutter_bootstrap.js" async></script>
+
+  <script>
+    const gifLoader = document.getElementById("gif-loader");
+    window.addEventListener("load", function () {
+      setTimeout(() => {
+        if (gifLoader) gifLoader.remove();
+      }, 2000);
+    });
+  </script>
 </body>
 </html>

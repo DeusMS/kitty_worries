@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "1042085303110",
+    "firebase_url": "https://kitty-worries-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "kitty-worries",
     "storage_bucket": "kitty-worries.firebasestorage.app"
   },

@@ -28,23 +28,36 @@ class _AuthScreenState extends State<AuthScreen> {
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
-              TextField(
-                controller: _loginController,
-                decoration: const InputDecoration(labelText: 'Email'),
+              Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: 500),
+                  child: TextField(
+                    controller: _loginController,
+                    decoration: const InputDecoration(labelText: 'Email'),
+                  ),
+                ),
               ),
               const SizedBox(height: 12),
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(labelText: 'Пароль'),
+              Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: 500),
+                  child: TextField(
+                    controller: _passwordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(labelText: 'Пароль'),
+                  ),
+                ),
               ),
               const SizedBox(height: 20),
-              isLoading
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                child: isLoading
                   ? const CircularProgressIndicator()
                   : ElevatedButton(
                       onPressed: _submit,
                       child: Text(isLogin ? 'Войти' : 'Зарегистрироваться'),
                     ),
+                ),
               TextButton(
                 onPressed: () => setState(() => isLogin = !isLogin),
                 child: Text(isLogin ? 'Нет аккаунта? Регистрация' : 'Уже есть аккаунт? Войти'),
