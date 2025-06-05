@@ -65,17 +65,19 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
     final accentColor = isDark ? Colors.orange : const Color(0xFF2979FF);
     final textStyle = theme.textTheme.bodyLarge;
 
-    return Padding(
-      padding: MediaQuery.of(context).viewInsets,
-      child: Container(
-        decoration: BoxDecoration(
-          color: theme.scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
+    return SafeArea(
+      child: Padding(
+        padding: MediaQuery.of(context).viewInsets,
+        child: SingleChildScrollView(
+          child: Container(
+            decoration: BoxDecoration(
+              color: theme.scaffoldBackgroundColor,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
             // Заголовок задачи
             Row(
               children: [
@@ -161,6 +163,8 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
           ],
         ),
       ),
-    );
+    ),
+  ),
+);
   }
 }
