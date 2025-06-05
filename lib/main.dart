@@ -31,6 +31,9 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+	
+	// Перехватываем все Flutter ошибки
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
 
   if (!kIsWeb) {
     await FirebaseMessaging.instance.requestPermission();
