@@ -43,11 +43,11 @@ jobs:
       - name: Устанавливаем зависимости
         run: flutter pub get
 
-      - name: Добавляем GoogleService-Info.plist
-        run: |
-          echo "$GOOGLE_SERVICE_INFO" | base64 --decode > ios/Runner/GoogleService-Info.plist
-        env:
-          GOOGLE_SERVICE_INFO: ${{ secrets.GOOGLE_SERVICE_INFO }} 
+      #- name: Добавляем GoogleService-Info.plist
+        #run: |
+          #echo "$GOOGLE_SERVICE_INFO" | base64 --decode > ios/Runner/GoogleService-Info.plist
+        #env:
+          #GOOGLE_SERVICE_INFO: ${{ secrets.GOOGLE_SERVICE_INFO }} 
       
       - name: Ensure iOS plugin registration
         run: flutter gen-l10n && flutter pub get && flutter packages pub run build_runner build --delete-conflicting-outputs || true    
