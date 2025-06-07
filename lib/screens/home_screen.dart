@@ -134,6 +134,19 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
 
     return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          _getTitle(),
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        backgroundColor: const Color(0xFFF5F5F7),
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black87),
+      ),
       drawer: const CustomDrawer(),
       body: screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
@@ -191,6 +204,17 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   String _getTitle() {
+    if (_selectedIndex == 1) {
+      return 'Календарь';
+    }
+    if (_selectedIndex == 2) {
+      return 'Настройки';
+    }
+
+    if (widget.listName != null) {
+      return widget.listName!;
+    }
+
     switch (widget.viewFilter) {
       case 'today':
         return 'Сегодня';
