@@ -20,7 +20,7 @@ final ThemeData darkTheme = ThemeData(
     bodyMedium: TextStyle(color: Colors.white70),
   ),
   floatingActionButtonTheme: const FloatingActionButtonThemeData(
-    backgroundColor: Colors.orange,
+    backgroundColor: Color(0xFFFF9800),
     foregroundColor: Colors.white,
   ),
   bottomNavigationBarTheme: const BottomNavigationBarThemeData(

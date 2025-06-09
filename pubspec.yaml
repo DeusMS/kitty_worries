@@ -39,3 +39,5 @@ flutter:
   uses-material-design: true
   assets:
     - lib/services/service-account.json
+    - assets/buttons/add_task_dark_theme.png
+    - assets/buttons/add_task_light_theme.png
